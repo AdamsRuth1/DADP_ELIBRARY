@@ -3,7 +3,29 @@ import { useNavigate } from "react-router-dom";
 
 import { SidebarData } from "./sidebarData";
 
-function Sidebar({ activeItem = "Dashboard", onNavigate }) {
+function parseJwt(token) {
+  try {
+    const payload = token.split('.')[1];
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decodeURIComponent(
+      json.split('').map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`).join('')
+    ));
+  } catch {
+    return null;
+  }
+}
+
+function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
+  const navigate = useNavigate();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const user = token ? parseJwt(token) : null;
+  const displayName = user?.name || user?.serviceID || 'User';
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
   return (
     <aside
       className="h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg"
@@ -20,6 +42,8 @@ function Sidebar({ activeItem = "Dashboard", onNavigate }) {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2" aria-label="Sidebar menu">
         {SidebarData.map((item, index) => {
+          // hide Management item unless Admin or SuperAdmin
+          if (item.title === 'Users' && !(role === 'Admin' || role === 'SuperAdmin')) return null;
           const isActive = activeItem === item.title;
 
           return (
@@ -43,7 +67,7 @@ function Sidebar({ activeItem = "Dashboard", onNavigate }) {
                 {item.icon}
               </span>
 
-              <span className="text-sm">{item.title}</span>
+            <span className="text-sm">{item.title === 'Users' && role === 'SuperAdmin' ? 'Users' : item.title}</span>
             </button>
           );
         })}
@@ -51,7 +75,25 @@ function Sidebar({ activeItem = "Dashboard", onNavigate }) {
 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-[#2c4d39]">
-        <p className="text-xs text-green-100/70">© 2026 DADP</p>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-[#1F3D2B]">
+            <span aria-hidden="true">👤</span>
+          </div>
+          <div>
+            <p className="text-sm font-semibold">{displayName}</p>
+            <p className="text-xs text-green-100/70">{role || 'Guest'}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full rounded-xl bg-[#2c4d39] px-4 py-2 text-sm text-white hover:bg-[#3f5f41] focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+        >
+          Logout
+        </button>
+
+        <p className="mt-4 text-xs text-green-100/70">© 2026 DADP</p>
       </div>
     </aside>
   );

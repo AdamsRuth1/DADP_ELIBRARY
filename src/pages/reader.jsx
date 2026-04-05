@@ -1,38 +1,316 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { RatingForm, ReviewList } from '../Components/Rating.jsx';
+
+const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 function Reader({ selectedBook, onBack }) {
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [readingTime, setReadingTime] = useState(0);
+  const [isReading, setIsReading] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
+  const [fontFamily, setFontFamily] = useState('serif');
+  const [nightMode, setNightMode] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [userRating, setUserRating] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  // Load saved progress and settings when component mounts
+  useEffect(() => {
+    if (selectedBook) {
+      const savedProgress = localStorage.getItem(`book_progress_${selectedBook.id}`);
+      if (savedProgress) {
+        const progress = JSON.parse(savedProgress);
+        setReadingProgress(progress.percentage || 0);
+        setReadingTime(progress.timeSpent || 0);
+      }
+
+      // Load reading settings
+      const settings = JSON.parse(localStorage.getItem('readingSettings') || '{}');
+      setFontSize(settings.fontSize || 16);
+      setFontFamily(settings.fontFamily || 'serif');
+      setNightMode(settings.nightMode || false);
+    }
+  }, [selectedBook]);
+
+  // Save settings when they change
+  useEffect(() => {
+    const settings = { fontSize, fontFamily, nightMode };
+    localStorage.setItem('readingSettings', JSON.stringify(settings));
+  }, [fontSize, fontFamily, nightMode]);
+
+  // Save progress when it changes
+  useEffect(() => {
+    if (selectedBook) {
+      const progressData = {
+        percentage: readingProgress,
+        timeSpent: readingTime,
+        lastRead: new Date().toISOString(),
+        bookId: selectedBook.id,
+        bookTitle: selectedBook.title
+      };
+      localStorage.setItem(`book_progress_${selectedBook.id}`, JSON.stringify(progressData));
+    }
+  }, [readingProgress, readingTime, selectedBook]);
+
+  // Load user's current rating for this book
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!selectedBook) return;
+
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        // Parse JWT to get user ID
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setCurrentUserId(payload.sub);
+
+        const res = await fetch(`${BACKEND_BASE}/api/books/${selectedBook.id}/rating`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const rating = await res.json();
+          setUserRating(rating);
+        }
+      } catch (err) {
+        console.error('Failed to load user rating', err);
+      }
+    };
+
+    loadUserRating();
+  }, [selectedBook]);
+  useEffect(() => {
+    let interval;
+    if (isReading) {
+      interval = setInterval(() => {
+        setReadingTime(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isReading]);
+
+  const handleProgressChange = (e) => {
+    const newProgress = parseInt(e.target.value);
+    setReadingProgress(newProgress);
+  };
+
+  const formatTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle rating submission
+  const handleRatingSubmit = async (ratingData) => {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    try {
+      const res = await fetch(`${BACKEND_BASE}/api/books/${selectedBook.id}/rating`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(ratingData)
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setUserRating({
+          id: result.id,
+          rating: result.rating,
+          review: result.review,
+          createdAt: new Date().toISOString()
+        });
+        setShowRatingModal(false);
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to submit rating', err);
+    }
+    return false;
+  };
+
   if (!selectedBook) return null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-[#1F3D2B] text-white px-6 py-4 flex items-center justify-between">
+    <div className={`flex flex-col min-h-screen ${nightMode ? 'bg-gray-900 text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <header className={`px-6 py-4 flex items-center justify-between ${nightMode ? 'bg-gray-800' : 'bg-[#1F3D2B] text-white'}`}>
         <button
           onClick={onBack}
-          className="rounded-lg bg-white/10 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+          className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
           aria-label="Back to library"
         >
           Back
         </button>
 
-        <h1 className="text-lg font-semibold">{selectedBook.title}</h1>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
+            aria-label="Rate this book"
+          >
+            ⭐ Rate & Review
+          </button>
+
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
+            aria-label="Reading settings"
+          >
+            ⚙️ Settings
+          </button>
+
+          <div className="flex flex-col items-center">
+            <h1 className="text-lg font-semibold">{selectedBook.title}</h1>
+            <div className="flex items-center gap-4 mt-1">
+              <span className="text-sm text-green-100">
+                Progress: {readingProgress}%
+              </span>
+              <span className="text-sm text-green-100">
+                Time: {formatTime(readingTime)}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <a
           href={selectedBook.file}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg bg-white text-[#1F3D2B] px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+          className={`rounded-lg px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white text-[#1F3D2B]'}`}
         >
           Open PDF
         </a>
       </header>
 
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className={`p-4 border-b ${nightMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Font Size:</label>
+              <input
+                type="range"
+                min="12"
+                max="24"
+                value={fontSize}
+                onChange={(e) => setFontSize(parseInt(e.target.value))}
+                className="w-20"
+              />
+              <span className="text-sm">{fontSize}px</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Font:</label>
+              <select
+                value={fontFamily}
+                onChange={(e) => setFontFamily(e.target.value)}
+                className={`p-1 border rounded ${nightMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="serif">Serif</option>
+                <option value="sans-serif">Sans Serif</option>
+                <option value="monospace">Monospace</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Night Mode:</label>
+              <button
+                onClick={() => setNightMode(!nightMode)}
+                className={`px-3 py-1 rounded ${nightMode ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-white'}`}
+              >
+                {nightMode ? '☀️ Day' : '🌙 Night'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="flex-1 p-4" aria-label="PDF reader">
+        {/* Reading Controls */}
+        <div className="mb-4 p-4 bg-white rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Reading Progress</h2>
+            <button
+              onClick={() => setIsReading(!isReading)}
+              className={`px-4 py-2 rounded-lg font-medium ${
+                isReading
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              {isReading ? 'Pause Reading' : 'Start Reading'}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Reading Progress: {readingProgress}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={readingProgress}
+                onChange={handleProgressChange}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Time spent reading: {formatTime(readingTime)}</span>
+              <span>Last read: {new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
         <iframe
           src={selectedBook.file}
           title={selectedBook.title}
-          className="w-full h-[85vh] rounded-xl border border-gray-300 bg-white"
+          className={`w-full h-[70vh] rounded-xl border border-gray-300 bg-white ${nightMode ? 'filter invert brightness-90' : ''}`}
+          onLoad={() => setIsReading(true)}
         />
       </main>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${nightMode ? 'bg-gray-800 text-white' : ''}`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Rate & Review: {selectedBook.title}</h2>
+                <button
+                  onClick={() => setShowRatingModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <RatingForm
+                  bookId={selectedBook.id}
+                  onRatingSubmit={handleRatingSubmit}
+                  initialRating={userRating}
+                />
+
+                <div className="border-t pt-6">
+                  <ReviewList bookId={selectedBook.id} currentUserId={currentUserId} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

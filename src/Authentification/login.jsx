@@ -4,6 +4,7 @@ import Sidebar from '../Components/sidebar'
 export default function LoginPage({ setPage }) {
   const [serviceID, setServiceID] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
 
@@ -12,12 +13,26 @@ export default function LoginPage({ setPage }) {
     if (e.key === 'Enter') callback();
   };
 
-  const handleLogin = () => {
-    // Here you could validate the input or call an API
-    if (serviceID && password) {
-      navigate('/dashboard'); // navigate to dashboard page
-    } else {
-      alert('Please enter both Service ID and Password.');
+  const handleLogin = async () => {
+    if (!serviceID || !password) return alert('Please enter both Service ID and Password.');
+    setLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceID, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return alert(data.error || 'Login failed');
+
+      // store token for later (simple localStorage)
+      if (data.token) localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('login error', err);
+      alert('Login failed (network)');
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,0 +1,36 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "History of CCTV",
+      "author": "J. Smith",
+      "category": "CCTV",
+      "file": "/books/uploads/1775292786964-history-of-cctv.pdf",
+      "thumbnail": "/books/uploads/1775292786975-Screenshot-2026-04-04-095232.png"
+    },
+    {
+      "id": 2,
+      "title": "Nigerian Army Customs and Ethics 2025",
+      "author": "NIGERIAN ARMY",
+      "category": "MILITARY",
+      "file": "/books/uploads/1775293000763-tce.pdf",
+      "thumbnail": "/books/uploads/1775293000785-Screenshot-2026-04-04-095350.png"
+    },
+    {
+      "id": 3,
+      "title": "Leadership in Operations",
+      "author": "K. Ade",
+      "category": "Leadership",
+      "file": "/books/na-doctrine.pdf",
+      "thumbnail": "/books/uploads/1775293409543-feem_EF6C2_IMG_9648_edited.jpg"
+    },
+    {
+      "id": 4,
+      "title": "ARMED FORCES OF NIGERIA JOINT SERVICE WRITING MANUAL",
+      "author": "MINISTRY OF DEFENCE",
+      "category": "MILITARY",
+      "file": "/books/uploads/1775290156093-ARMED-FORCES-OF-NIGERIA-JOINT-SERVICE-WRITING-MANUAL-2025-EDITION.pdf",
+      "thumbnail": "/books/uploads/1775290156195-Screenshot-2026-04-03-173618.png"
+    }
+  ]
+}
