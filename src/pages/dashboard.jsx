@@ -263,7 +263,7 @@ function Dashboard() {
         )}
 
         {activeItem === "Dashboard" && (
-          <div>
+          <div className="ml-64 min-h-screen">
             <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
             <p className="mt-2 text-gray-600 mb-8">
               Welcome to the DADP eLibrary dashboard.

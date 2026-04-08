@@ -28,9 +28,9 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
 
   return (
     <aside
-      className="h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg"
-      aria-label="Main sidebar navigation"
-    >
+    className="fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg"
+    aria-label="Main sidebar navigation"
+  >
       {/* Header */}
       <div className="px-6 py-5 border-b border-[#2c4d39]">
         <h1 className="text-xl font-bold tracking-wide">DADP eLibrary</h1>

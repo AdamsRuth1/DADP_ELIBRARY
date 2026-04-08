@@ -31,6 +31,22 @@
       "category": "MILITARY",
       "file": "/books/uploads/1775290156093-ARMED-FORCES-OF-NIGERIA-JOINT-SERVICE-WRITING-MANUAL-2025-EDITION.pdf",
       "thumbnail": "/books/uploads/1775290156195-Screenshot-2026-04-03-173618.png"
+    },
+    {
+      "id": 5,
+      "title": "Artificial Intelligence",
+      "author": "Ade",
+      "category": "AI",
+      "file": "/books/ai.docx",
+      "thumbnail": "/books/uploads/aiImage.png"
+    },
+    {
+      "id": 6,
+      "title": "Ethical hacking",
+      "author": "Ade",
+      "category": "Ethical Hacking",
+      "file": "/books/ethicalHacking.docx",
+      "thumbnail": "/books/uploads/ethicalhacking.png"
     }
   ]
 }
