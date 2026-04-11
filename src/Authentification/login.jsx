@@ -19,7 +19,7 @@ export default function LoginPage({ setPage }) {
     if (!serviceID || !password) return alert('Please enter both Service ID and Password.');
     setLoading(true);
     try {
-      const res = await fetch(`${API}/login`, {
+      const res = await fetch(`${API}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ serviceID, password }),
