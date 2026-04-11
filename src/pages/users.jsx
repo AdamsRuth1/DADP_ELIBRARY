@@ -179,7 +179,7 @@ function UsersPage() {
 
  async function fetchUsers() {
   setLoading(true);
-  const res = await fetch(`${API}/api/users`, {
+  const res = await fetch(`${API}/users`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
@@ -192,7 +192,7 @@ async function createUser(e) {
 
   if (editingUserId) return updateUser(editingUserId);
 
-  const res = await fetch(`${API}/api/users`, {
+  const res = await fetch(`${API}/users`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -218,7 +218,7 @@ async function updateUser(id) {
   if (editUserForm.password) payload.password = editUserForm.password;
   if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
 
-  const res = await fetch(`${API}/api/users/${id}`, {
+  const res = await fetch(`${API}/users/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -238,7 +238,7 @@ async function updateUser(id) {
 }
 
 async function fetchBooks() {
-  const res = await fetch(`${API}/api/books`);
+  const res = await fetch(`${API}/books`);
   if (res.ok) setBooks(await res.json());
 }
 
@@ -253,7 +253,7 @@ async function createBook(e) {
   if (bookForm.file) formData.append('pdf', bookForm.file);
   if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
 
-  const res = await fetch(`${API}/api/books`, {
+  const res = await fetch(`${API}/books`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData
@@ -278,7 +278,7 @@ async function updateBook(id) {
   if (editBookForm.file) formData.append('pdf', editBookForm.file);
   if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
 
-  const res = await fetch(`${API}/api/books/${id}`, {
+  const res = await fetch(`${API}/books/${id}`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}` },
     body: formData
@@ -297,7 +297,7 @@ async function updateBook(id) {
 async function deleteBook(id) {
   if (!confirm('Delete book?')) return;
 
-  const res = await fetch(`${API}/api/books/${id}`, {
+  const res = await fetch(`${API}/books/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -309,7 +309,7 @@ async function deleteBook(id) {
 async function deleteUser(id) {
   if (!confirm('Delete user?')) return;
 
-  const res = await fetch(`${API}/api/users/${id}`, {
+  const res = await fetch(`${API}/users/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -319,7 +319,7 @@ async function deleteUser(id) {
 }
 
 async function fetchViewHistory(bookId) {
-  const res = await fetch(`${API}/api/books/${bookId}/views`, {
+  const res = await fetch(`${API}/books/${bookId}/views`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
