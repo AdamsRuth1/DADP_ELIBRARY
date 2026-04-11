@@ -38,144 +38,299 @@ function UsersPage() {
     fetchBooks();
   }, []);
 
-  async function fetchUsers() {
-    setLoading(true);
-    const res = await fetch(`${API}/api/users`, { headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) setUsers(await res.json());
-    setLoading(false);
-  }
+  // async function fetchUsers() {
+  //   setLoading(true);
+  //   const res = await fetch(`${API}/api/users`, { headers: { Authorization: `Bearer ${token}` } });
+  //   if (res.ok) setUsers(await res.json());
+  //   setLoading(false);
+  // }
 
-  async function createUser(e) {
-    e.preventDefault();
-    // if editing, do update
-    if (editingUserId) return updateUser(editingUserId);
+  // async function createUser(e) {
+  //   e.preventDefault();
+  //   // if editing, do update
+  //   if (editingUserId) return updateUser(editingUserId);
 
-    const res = await fetch(`${API}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
-    if (res.ok) {
-      setForm({ serviceID: '', name: '', password: '', role: 'User' });
-      setUserModal({ open: false, mode: 'add', user: null });
-      fetchUsers();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed');
-    }
-  }
+  //   const res = await fetch(`${API}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
+  //   if (res.ok) {
+  //     setForm({ serviceID: '', name: '', password: '', role: 'User' });
+  //     setUserModal({ open: false, mode: 'add', user: null });
+  //     fetchUsers();
+  //   } else {
+  //     const err = await res.json();
+  //     alert(err.error || 'Failed');
+  //   }
+  // }
 
-  async function editUser(u) {
-    setUserModal({ open: true, mode: 'edit', user: u });
-    setEditUserForm({ name: u.name || '', password: '', role: u.role || 'User' });
-  }
+  // async function editUser(u) {
+  //   setUserModal({ open: true, mode: 'edit', user: u });
+  //   setEditUserForm({ name: u.name || '', password: '', role: u.role || 'User' });
+  // }
 
-  function openAddUserModal() {
-    setUserModal({ open: true, mode: 'add', user: null });
+  // function openAddUserModal() {
+  //   setUserModal({ open: true, mode: 'add', user: null });
+  //   setForm({ serviceID: '', name: '', password: '', role: 'User' });
+  // }
+
+  // async function updateUser(id) {
+  //   const payload = {};
+  //   if (editUserForm.name !== undefined) payload.name = editUserForm.name;
+  //   if (editUserForm.password) payload.password = editUserForm.password;
+  //   if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
+
+  //   const res = await fetch(`${API}/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+  //   if (res.ok) {
+  //     setEditUserForm({ name: '', password: '', role: 'User' });
+  //     setUserModal({ open: false, mode: 'add', user: null });
+  //     fetchUsers();
+  //   } else {
+  //     const err = await res.json();
+  //     alert(err.error || 'Failed to update');
+  //   }
+  // }
+
+  // async function fetchBooks() {
+  //   const res = await fetch(`${API}/api/books`);
+  //   if (res.ok) setBooks(await res.json());
+  // }
+
+  // async function handleBookFileChange(e, setterName) {
+  //   const file = e.target.files && e.target.files[0];
+  //   if (setterName === 'book') setBookForm({...bookForm, file});
+  //   else setEditBookForm({...editBookForm, file});
+  // }
+
+  // async function handleThumbnailChange(e, setterName) {
+  //   const file = e.target.files && e.target.files[0];
+  //   if (setterName === 'book') setBookForm({...bookForm, thumbnail: file});
+  //   else setEditBookForm({...editBookForm, thumbnail: file});
+  // }
+
+  // async function createBook(e) {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+  //   formData.append('title', bookForm.title);
+  //   formData.append('author', bookForm.author);
+  //   formData.append('category', bookForm.category || '');
+  //   if (bookForm.file) formData.append('pdf', bookForm.file);
+  //   if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
+
+  //   const res = await fetch(`${API}/api/books`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+  //   if (res.ok) {
+  //     setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+  //     setBookModal({ open: false, mode: 'add', book: null });
+  //     fetchBooks();
+  //   } else {
+  //     const err = await res.json();
+  //     alert(err.error || 'Failed to add book');
+  //   }
+  // }
+
+  // async function editBook(b) {
+  //   setBookModal({ open: true, mode: 'edit', book: b });
+  //   setEditBookForm({ title: b.title || '', author: b.author || '', category: b.category || '', file: null, thumbnail: null });
+  // }
+
+  // function openAddBookModal() {
+  //   setBookModal({ open: true, mode: 'add', book: null });
+  //   setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+  // }
+
+  // async function updateBook(id) {
+  //   const formData = new FormData();
+  //   if (editBookForm.title) formData.append('title', editBookForm.title);
+  //   if (editBookForm.author) formData.append('author', editBookForm.author);
+  //   if (editBookForm.category) formData.append('category', editBookForm.category || '');
+  //   if (editBookForm.file) formData.append('pdf', editBookForm.file);
+  //   if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
+
+  //   const res = await fetch(`${API}/api/books/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData });
+  //   if (res.ok) {
+  //     setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+  //     setBookModal({ open: false, mode: 'add', book: null });
+  //     fetchBooks();
+  //   } else {
+  //     const err = await res.json();
+  //     alert(err.error || 'Failed to update book');
+  //   }
+  // }
+
+  // async function deleteBook(id) {
+  //   if (!confirm('Delete book?')) return;
+  //   const res = await fetch(`${API}/api/books/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+  //   if (res.ok) fetchBooks(); else alert('Failed to delete');
+  // }
+
+  // async function deleteUser(id) {
+  //   if (!confirm('Delete user?')) return;
+  //   const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+  //   if (res.ok) fetchUsers(); else alert('Failed to delete');
+  // }
+
+  // async function fetchViewHistory(bookId) {
+  //   const res = await fetch(`${API}/api/books/${bookId}/views`, { headers: { Authorization: `Bearer ${token}` } });
+  //   if (res.ok) {
+  //     const rows = await res.json();
+  //     setViewHistory({ open: true, bookId, rows });
+  //   } else {
+  //     const err = await res.json();
+  //     alert(err.error || 'Failed to fetch history');
+  //   }
+  // }
+
+ async function fetchUsers() {
+  setLoading(true);
+  const res = await fetch(`${API}/users`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (res.ok) setUsers(await res.json());
+  setLoading(false);
+}
+
+async function createUser(e) {
+  e.preventDefault();
+
+  if (editingUserId) return updateUser(editingUserId);
+
+  const res = await fetch(`${API}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(form)
+  });
+
+  if (res.ok) {
     setForm({ serviceID: '', name: '', password: '', role: 'User' });
+    setUserModal({ open: false, mode: 'add', user: null });
+    fetchUsers();
+  } else {
+    const err = await res.json();
+    alert(err.error || 'Failed');
   }
+}
 
-  async function updateUser(id) {
-    const payload = {};
-    if (editUserForm.name !== undefined) payload.name = editUserForm.name;
-    if (editUserForm.password) payload.password = editUserForm.password;
-    if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
+async function updateUser(id) {
+  const payload = {};
 
-    const res = await fetch(`${API}/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
-    if (res.ok) {
-      setEditUserForm({ name: '', password: '', role: 'User' });
-      setUserModal({ open: false, mode: 'add', user: null });
-      fetchUsers();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to update');
-    }
+  if (editUserForm.name !== undefined) payload.name = editUserForm.name;
+  if (editUserForm.password) payload.password = editUserForm.password;
+  if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
+
+  const res = await fetch(`${API}/users/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (res.ok) {
+    setEditUserForm({ name: '', password: '', role: 'User' });
+    setUserModal({ open: false, mode: 'add', user: null });
+    fetchUsers();
+  } else {
+    const err = await res.json();
+    alert(err.error || 'Failed to update');
   }
+}
 
-  async function fetchBooks() {
-    const res = await fetch(`${API}/api/books`);
-    if (res.ok) setBooks(await res.json());
-  }
+async function fetchBooks() {
+  const res = await fetch(`${API}/books`);
+  if (res.ok) setBooks(await res.json());
+}
 
-  async function handleBookFileChange(e, setterName) {
-    const file = e.target.files && e.target.files[0];
-    if (setterName === 'book') setBookForm({...bookForm, file});
-    else setEditBookForm({...editBookForm, file});
-  }
+async function createBook(e) {
+  e.preventDefault();
 
-  async function handleThumbnailChange(e, setterName) {
-    const file = e.target.files && e.target.files[0];
-    if (setterName === 'book') setBookForm({...bookForm, thumbnail: file});
-    else setEditBookForm({...editBookForm, thumbnail: file});
-  }
+  const formData = new FormData();
+  formData.append('title', bookForm.title);
+  formData.append('author', bookForm.author);
+  formData.append('category', bookForm.category || '');
 
-  async function createBook(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('title', bookForm.title);
-    formData.append('author', bookForm.author);
-    formData.append('category', bookForm.category || '');
-    if (bookForm.file) formData.append('pdf', bookForm.file);
-    if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
+  if (bookForm.file) formData.append('pdf', bookForm.file);
+  if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
 
-    const res = await fetch(`${API}/api/books`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
-    if (res.ok) {
-      setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
-      setBookModal({ open: false, mode: 'add', book: null });
-      fetchBooks();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to add book');
-    }
-  }
+  const res = await fetch(`${API}/books`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
 
-  async function editBook(b) {
-    setBookModal({ open: true, mode: 'edit', book: b });
-    setEditBookForm({ title: b.title || '', author: b.author || '', category: b.category || '', file: null, thumbnail: null });
-  }
-
-  function openAddBookModal() {
-    setBookModal({ open: true, mode: 'add', book: null });
+  if (res.ok) {
     setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+    setBookModal({ open: false, mode: 'add', book: null });
+    fetchBooks();
+  } else {
+    const err = await res.json();
+    alert(err.error || 'Failed to add book');
   }
+}
 
-  async function updateBook(id) {
-    const formData = new FormData();
-    if (editBookForm.title) formData.append('title', editBookForm.title);
-    if (editBookForm.author) formData.append('author', editBookForm.author);
-    if (editBookForm.category) formData.append('category', editBookForm.category || '');
-    if (editBookForm.file) formData.append('pdf', editBookForm.file);
-    if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
+async function updateBook(id) {
+  const formData = new FormData();
 
-    const res = await fetch(`${API}/api/books/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData });
-    if (res.ok) {
-      setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
-      setBookModal({ open: false, mode: 'add', book: null });
-      fetchBooks();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to update book');
-    }
+  if (editBookForm.title) formData.append('title', editBookForm.title);
+  if (editBookForm.author) formData.append('author', editBookForm.author);
+  if (editBookForm.category) formData.append('category', editBookForm.category || '');
+  if (editBookForm.file) formData.append('pdf', editBookForm.file);
+  if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
+
+  const res = await fetch(`${API}/books/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
+
+  if (res.ok) {
+    setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+    setBookModal({ open: false, mode: 'add', book: null });
+    fetchBooks();
+  } else {
+    const err = await res.json();
+    alert(err.error || 'Failed to update book');
   }
+}
 
-  async function deleteBook(id) {
-    if (!confirm('Delete book?')) return;
-    const res = await fetch(`${API}/api/books/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) fetchBooks(); else alert('Failed to delete');
-  }
+async function deleteBook(id) {
+  if (!confirm('Delete book?')) return;
 
-  async function deleteUser(id) {
-    if (!confirm('Delete user?')) return;
-    const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) fetchUsers(); else alert('Failed to delete');
-  }
+  const res = await fetch(`${API}/books/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
 
-  async function fetchViewHistory(bookId) {
-    const res = await fetch(`${API}/api/books/${bookId}/views`, { headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) {
-      const rows = await res.json();
-      setViewHistory({ open: true, bookId, rows });
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to fetch history');
-    }
+  if (res.ok) fetchBooks();
+  else alert('Failed to delete');
+}
+
+async function deleteUser(id) {
+  if (!confirm('Delete user?')) return;
+
+  const res = await fetch(`${API}/users/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (res.ok) fetchUsers();
+  else alert('Failed to delete');
+}
+
+async function fetchViewHistory(bookId) {
+  const res = await fetch(`${API}/books/${bookId}/views`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (res.ok) {
+    const rows = await res.json();
+    setViewHistory({ open: true, bookId, rows });
+  } else {
+    const err = await res.json();
+    alert(err.error || 'Failed to fetch history');
   }
+} 
 
   return (
     <section className="bg-slate-50 text-slate-900 p-6 ml-64 min-h-screen">

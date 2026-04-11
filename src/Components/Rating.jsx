@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const BACKEND_BASE = import.meta.env.VITE_API_URL;
 
 function StarRating({ rating, onRatingChange, readonly = false, size = 'md' }) {
   const [hoverRating, setHoverRating] = useState(0);
