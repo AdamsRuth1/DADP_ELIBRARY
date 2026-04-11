@@ -14,11 +14,12 @@ export default function LoginPage({ setPage }) {
     if (e.key === 'Enter') callback();
   };
 
+  const API = import.meta.env.VITE_API_URL;
   const handleLogin = async () => {
     if (!serviceID || !password) return alert('Please enter both Service ID and Password.');
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/login`, {
+      const res = await fetch(`${API}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ serviceID, password }),
