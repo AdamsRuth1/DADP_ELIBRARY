@@ -24,6 +24,4 @@ Run
 
 Server runs on port 4000 by default.
 
-Notes
-
-- This is a minimal demo backend. For production, add proper authentication, input validation, and a real database.
+-- Omega-- Books not currently stored in db, to be implemented on production

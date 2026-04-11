@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import Logo from '../assets/cyberwarfareLogo.png';
 import { SidebarData } from "./sidebarData";
 
 function parseJwt(token) {
@@ -32,11 +32,19 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
     aria-label="Main sidebar navigation"
   >
       {/* Header */}
-      <div className="px-6 py-5 border-b border-[#2c4d39]">
-        <h1 className="text-xl font-bold tracking-wide">DADP eLibrary</h1>
-        <p className="mt-1 text-xs text-green-100/70">
-          Internal Knowledge Portal
-        </p>
+      <div className="px-6 py-5 border-b border-[#2c4d39] flex" >
+        <img
+          src={Logo}
+          alt=""
+          className="inset-0 m-auto w-[50px] opacity-1 pointer"
+        />
+        <div>
+          <h1 className="text-xl font-bold tracking-wide">DADP eLibrary</h1>
+          <p className="mt-1 text-xs text-green-100/70">
+            Internal Knowledge Portal
+          </p>
+        </div> 
+
       </div>
 
       {/* Navigation */}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import Logo from "../assets/cyberwarfareLogo.jpeg";
+import Logo from "../assets/cyberwarfareLogo.png";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

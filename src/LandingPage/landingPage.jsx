@@ -1,6 +1,6 @@
 import React from "react";
 import NavBar from "./navigation";
-import Logo from "../assets/cyberwarfareLogo.jpeg";
+import Logo from "../assets/cyberwarfareLogo.png";
 import Coreresponsibility from "./coreResponsibility";
 import HowItWorks from "../LandingPage/working"
 import InclusiveAccess from "../LandingPage/inclusiveAccess"
@@ -59,7 +59,7 @@ function LandingPage() {
                 <img
                   src={Logo}
                   alt="preview"
-                  className="relative z-10 w-full max-w-md rounded-2xl shadow-xl border border-gray-200"
+                  className="relative z-10 w-full max-w-md rounded-2xl drop-shadow"
                 />
               </div>
             </div>

@@ -5,7 +5,30 @@ const cors = require('cors');
 
 const app = express();
 
-app.use(cors());
+
+/*app.use(cors()); -- for local deployment only*/
+
+
+/* Prepared for production with CORS configured to allow frontend access from defined origines. */
+
+app.set('trust proxy', 1);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://dadp-elibrary.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'db.json');

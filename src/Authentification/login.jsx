@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../Components/sidebar'
-import Logo from '../assets/cyberwarfareLogo.jpeg';
+import Logo from '../assets/cyberwarfareLogo.png';
 export default function LoginPage({ setPage }) {
   const [serviceID, setServiceID] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +43,7 @@ export default function LoginPage({ setPage }) {
        <img
         src={Logo}
         alt=""
-        className="absolute inset-0 m-auto w-[400px] opacity-5 pointer-events-none select-none"
+        className="absolute inset-0 m-auto w-[800px] opacity-5 pointer-events-none select-none"
       />
       <div
         className="w-96 p-6 bg-white rounded-lg shadow-lg"
