@@ -662,4 +662,6 @@ app.use('/books', express.static(PUBLIC_DIR));
 // Basic health
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-module.exports = { app, loadDB, saveDB };
+/*module.exports = { app, loadDB, saveDB, sqlitedb, JWT_SECRET, logActivity };*/
+
+module.exports = app;
