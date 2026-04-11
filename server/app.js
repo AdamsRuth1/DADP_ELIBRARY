@@ -15,7 +15,8 @@ app.set('trust proxy', 1);
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://dadp-elibrary.vercel.app"
+  "https://dadp-elibrary.vercel.app",
+  "https://dadp-e-library-new.vercel.app"
 ];
 
 app.use(cors({
