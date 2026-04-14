@@ -19,7 +19,8 @@ const allowedOrigins = [
   "http://localhost:4173",
   "http://127.0.0.1:4173",
   "https://dadp-elibrary.vercel.app",
-  "https://dadp-e-library-new.vercel.app"
+  "https://dadp-e-library-new.vercel.app",
+  "https://dadpelibrary.vercel.app"
 ];
 
 app.use(cors({
