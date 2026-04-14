@@ -21,6 +21,7 @@ function parseJwt(token) {
 function Dashboard() {
   const [activeItem, setActiveItem] = useState("Library");
   const [selectedBook, setSelectedBook] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [readingStats, setReadingStats] = useState({
@@ -250,9 +251,31 @@ function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 ">
-      <Sidebar activeItem={activeItem} onNavigate={setActiveItem} role={role} />
+      <Sidebar
+        activeItem={activeItem}
+        onNavigate={setActiveItem}
+        role={role}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <main className="flex-1 p-6 overflow-x-auto">
+      {/* Mobile top bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 md:hidden bg-white/90 backdrop-blur border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="px-3 py-2 rounded-lg bg-[#1F3D2B] text-white focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+          <div className="text-sm font-semibold text-gray-900">DADP eLibrary</div>
+          <div className="w-10" />
+        </div>
+      </div>
+
+      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:p-6 md:pt-6">
         {activeItem === "Library" && (
           <Library onOpenBook={setSelectedBook} />
         )}
@@ -270,7 +293,7 @@ function Dashboard() {
         )}
 
         {activeItem === "Dashboard" && (
-          <div className="ml-64 min-h-screen">
+          <div className="min-h-screen md:ml-64">
             <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
             <p className="mt-2 text-gray-600 mb-8">
               Welcome to the DADP eLibrary dashboard.

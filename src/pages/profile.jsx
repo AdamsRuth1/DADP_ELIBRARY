@@ -60,7 +60,7 @@ function Profile({ user, onBack }) {
 
   if (loading) {
     return (
-      <div className="ml-64 flex items-center justify-center min-h-screen">
+      <div className="md:ml-64 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F3D2B] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading profile...</p>
@@ -71,7 +71,7 @@ function Profile({ user, onBack }) {
 
   if (error) {
     return (
-      <div className="ml-64 flex items-center justify-center min-h-screen">
+      <div className="md:ml-64 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
           <button
@@ -88,7 +88,7 @@ function Profile({ user, onBack }) {
   if (!profile) {
     const fallbackName = user?.name || user?.serviceID || "Reader";
     return (
-      <div className="ml-64 min-h-screen bg-gray-50">
+      <div className="md:ml-64 min-h-screen bg-gray-50">
         <header className="bg-[#1F3D2B] text-white px-6 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -174,7 +174,7 @@ function Profile({ user, onBack }) {
   const dna = computeReadingDNA();
 
   return (
-    <div className="ml-64 min-h-screen bg-gray-50">
+    <div className="md:ml-64 min-h-screen bg-gray-50">
       <header className="bg-[#1F3D2B] text-white px-6 py-4">
         <div className="flex items-center justify-between">
           <button

@@ -15,7 +15,7 @@ function parseJwt(token) {
   }
 }
 
-function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
+function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, onClose }) {
   const navigate = useNavigate();
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const user = token ? parseJwt(token) : null;
@@ -27,10 +27,26 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
   };
 
   return (
-    <aside
-    className="fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg"
-    aria-label="Main sidebar navigation"
-  >
+    <>
+      {/* Mobile overlay */}
+      <button
+        type="button"
+        onClick={() => onClose && onClose()}
+        className={`fixed inset-0 z-40 bg-black/40 md:hidden ${isOpen ? "block" : "hidden"}`}
+        aria-label="Close sidebar"
+      />
+
+      <aside
+        className={[
+          "fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg",
+          "transform transition-transform duration-200",
+          // Desktop: always visible
+          "md:translate-x-0",
+          // Mobile: slide in/out
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        ].join(" ")}
+        aria-label="Main sidebar navigation"
+      >
       {/* Header */}
       <div className="px-6 py-5 border-b border-[#2c4d39] flex" >
         <img
@@ -58,7 +74,10 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
             <button
               key={index}
               type="button"
-              onClick={() => onNavigate && onNavigate(item.title)}
+              onClick={() => {
+                onNavigate && onNavigate(item.title);
+                onClose && onClose();
+              }}
               className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] focus:ring-offset-2 focus:ring-offset-[#1F3D2B] ${
                 isActive
                   ? "bg-white text-[#1F3D2B] shadow-md font-semibold"
@@ -104,6 +123,7 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role }) {
         <p className="mt-4 text-xs text-green-100/70">© 2026 DADP</p>
       </div>
     </aside>
+    </>
   );
 }
 

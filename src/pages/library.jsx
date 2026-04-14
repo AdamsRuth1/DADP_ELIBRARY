@@ -212,7 +212,7 @@ function Library({ onOpenBook }) {
   if (loading) return <p>Loading books…</p>;
 
   return (
-    <section className="ml-64 min-h-screen" aria-label="Library books">
+    <section className="min-h-screen md:ml-64" aria-label="Library books">
       <h1 className="text-2xl font-bold mb-6">Library</h1>
 
       {/* Filters */}

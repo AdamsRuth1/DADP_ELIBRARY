@@ -332,7 +332,7 @@ function UsersPage() {
 // } 
 
   return (
-    <section className="bg-slate-50 text-slate-900 p-6 ml-64 min-h-screen">
+    <section className="bg-slate-50 text-slate-900 p-4 md:p-6 min-h-screen md:ml-64">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
         <button
