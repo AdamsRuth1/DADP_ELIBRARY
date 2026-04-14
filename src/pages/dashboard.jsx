@@ -4,6 +4,8 @@ import Library from "../pages/library";
 import Reader from "../pages/reader";
 import UsersPage from "./users";
 import Profile from "./profile";
+import Bookmarks from "./bookmarks";
+import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 
 function parseJwt(token) {
   try {
@@ -262,6 +264,10 @@ function Dashboard() {
           <Profile user={jwt} onBack={() => setActiveItem("Dashboard")} />
         )}
 
+        {activeItem === "Bookmarks" && (
+          <Bookmarks onOpenBook={setSelectedBook} />
+        )}
+
         {activeItem === "Dashboard" && (
           <div className="ml-64 min-h-screen">
             <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
@@ -498,6 +504,12 @@ function Dashboard() {
             )}
           </div>
         )}
+
+        <AiLibrarianWidget
+          mode="dashboard"
+          onNavigate={setActiveItem}
+          onOpenBook={setSelectedBook}
+        />
       </main>
     </div>
   );

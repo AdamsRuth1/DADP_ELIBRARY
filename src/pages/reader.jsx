@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { RatingForm, ReviewList } from '../Components/Rating.jsx';
+import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 
 const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -14,6 +15,33 @@ function Reader({ selectedBook, onBack }) {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [showBookmarkModal, setShowBookmarkModal] = useState(false);
+  const [bookmarkNote, setBookmarkNote] = useState("");
+
+  const addBookmark = () => {
+    try {
+      const existing = JSON.parse(localStorage.getItem("bookBookmarks") || "[]");
+      const arr = Array.isArray(existing) ? existing : [];
+      const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      const bm = {
+        id,
+        bookId: selectedBook.id,
+        bookTitle: selectedBook.title,
+        bookAuthor: selectedBook.author,
+        progress: readingProgress,
+        note: bookmarkNote.trim(),
+        createdAt: new Date().toISOString(),
+        bookSnapshot: selectedBook
+      };
+      const next = [bm, ...arr].slice(0, 500);
+      localStorage.setItem("bookBookmarks", JSON.stringify(next));
+      setBookmarkNote("");
+      setShowBookmarkModal(false);
+    } catch (e) {
+      console.error("Failed to save bookmark", e);
+      alert("Failed to save bookmark");
+    }
+  };
 
   // Load saved progress and settings when component mounts
   useEffect(() => {
@@ -152,6 +180,14 @@ function Reader({ selectedBook, onBack }) {
         </button>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowBookmarkModal(true)}
+            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
+            aria-label="Bookmark this moment"
+          >
+            🔖 Bookmark
+          </button>
+
           <button
             onClick={() => setShowRatingModal(true)}
             className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
@@ -311,6 +347,61 @@ function Reader({ selectedBook, onBack }) {
           </div>
         </div>
       )}
+
+      {/* Bookmark Modal */}
+      {showBookmarkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`bg-white rounded-lg shadow-xl max-w-xl w-full ${nightMode ? 'bg-gray-800 text-white' : ''}`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Bookmark: {selectedBook.title}</h2>
+                <button
+                  onClick={() => setShowBookmarkModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-900">
+                Saved at <span className="font-semibold">{readingProgress}%</span> progress.
+              </div>
+
+              <label className="block mt-4 text-sm font-medium">
+                Optional note
+              </label>
+              <textarea
+                value={bookmarkNote}
+                onChange={(e) => setBookmarkNote(e.target.value)}
+                rows={4}
+                className={`mt-2 w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                placeholder="Why is this part important?"
+              />
+
+              <div className="mt-5 flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowBookmarkModal(false)}
+                  className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addBookmark}
+                  className="px-4 py-2 rounded-lg bg-[#1F3D2B] text-white hover:bg-[#2A4A3A] focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+                >
+                  Save bookmark
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AiLibrarianWidget
+        mode="reader"
+        currentBook={selectedBook}
+      />
     </div>
   );
 }

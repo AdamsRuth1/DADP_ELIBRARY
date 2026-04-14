@@ -14,7 +14,7 @@ export default function LoginPage({ setPage }) {
     if (e.key === 'Enter') callback();
   };
 
-  const API = import.meta.env.VITE_API_URL;
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
   const handleLogin = async () => {
     if (!serviceID || !password) return alert('Please enter both Service ID and Password.');
     setLoading(true);
@@ -24,7 +24,8 @@ export default function LoginPage({ setPage }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ serviceID, password }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       if (!res.ok) return alert(data.error || 'Login failed');
 
       // store token for later (simple localStorage)
