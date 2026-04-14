@@ -37,6 +37,14 @@ app.use(cors({
       callback(null, true);
       return;
     }
+
+    // Allow Vercel preview + prod domains (e.g. dadpelibrary-*-*.vercel.app)
+    // This prevents CORS breakage when testing Preview deployments.
+    if (origin && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) {
+      callback(null, true);
+      return;
+    }
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
