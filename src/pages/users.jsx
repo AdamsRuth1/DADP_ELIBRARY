@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+import { API_BASE } from "../config/apiBase";
 
 function parseJwt(token) {
   try {
@@ -40,7 +39,7 @@ function UsersPage() {
 
   async function fetchUsers() {
     setLoading(true);
-    const res = await fetch(`${API}/api/users`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE}/api/users`, { headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) setUsers(await res.json());
     setLoading(false);
   }
@@ -50,7 +49,7 @@ function UsersPage() {
     // if editing, do update
     if (editingUserId) return updateUser(editingUserId);
 
-    const res = await fetch(`${API}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
+    const res = await fetch(`${API_BASE}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
     if (res.ok) {
       setForm({ serviceID: '', name: '', password: '', role: 'User' });
       setUserModal({ open: false, mode: 'add', user: null });
@@ -77,7 +76,7 @@ function UsersPage() {
     if (editUserForm.password) payload.password = editUserForm.password;
     if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
 
-    const res = await fetch(`${API}/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
+    const res = await fetch(`${API_BASE}/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
     if (res.ok) {
       setEditUserForm({ name: '', password: '', role: 'User' });
       setUserModal({ open: false, mode: 'add', user: null });
@@ -89,7 +88,7 @@ function UsersPage() {
   }
 
   async function fetchBooks() {
-    const res = await fetch(`${API}/api/books`);
+    const res = await fetch(`${API_BASE}/api/books`);
     if (res.ok) setBooks(await res.json());
   }
 
@@ -114,7 +113,7 @@ function UsersPage() {
     if (bookForm.file) formData.append('pdf', bookForm.file);
     if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
 
-    const res = await fetch(`${API}/api/books`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+    const res = await fetch(`${API_BASE}/api/books`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
     if (res.ok) {
       setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
       setBookModal({ open: false, mode: 'add', book: null });
@@ -143,7 +142,7 @@ function UsersPage() {
     if (editBookForm.file) formData.append('pdf', editBookForm.file);
     if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
 
-    const res = await fetch(`${API}/api/books/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData });
+    const res = await fetch(`${API_BASE}/api/books/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData });
     if (res.ok) {
       setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
       setBookModal({ open: false, mode: 'add', book: null });
@@ -156,18 +155,18 @@ function UsersPage() {
 
   async function deleteBook(id) {
     if (!confirm('Delete book?')) return;
-    const res = await fetch(`${API}/api/books/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE}/api/books/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) fetchBooks(); else alert('Failed to delete');
   }
 
   async function deleteUser(id) {
     if (!confirm('Delete user?')) return;
-    const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) fetchUsers(); else alert('Failed to delete');
   }
 
   async function fetchViewHistory(bookId) {
-    const res = await fetch(`${API}/api/books/${bookId}/views`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE}/api/books/${bookId}/views`, { headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) {
       const rows = await res.json();
       setViewHistory({ open: true, bookId, rows });

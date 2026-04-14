@@ -6,6 +6,7 @@ import UsersPage from "./users";
 import Profile from "./profile";
 import Bookmarks from "./bookmarks";
 import AiLibrarianWidget from "../Components/AiLibrarianWidget";
+import { API_BASE } from "../config/apiBase";
 
 function parseJwt(token) {
   try {
@@ -48,7 +49,7 @@ function Dashboard() {
     const favoriteIds = JSON.parse(localStorage.getItem('bookFavorites') || '[]');
     if (favoriteIds.length > 0) {
       // Fetch book details for favorites
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/books`)
+      fetch(`${API_BASE}/api/books`)
         .then(res => res.json())
         .then(books => {
           const favoriteBooks = books.filter(book => favoriteIds.includes(book.id));
@@ -162,7 +163,7 @@ function Dashboard() {
     setAnalyticsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/analytics`, {
+      const res = await fetch(`${API_BASE}/api/analytics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

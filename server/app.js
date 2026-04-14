@@ -14,8 +14,11 @@ const app = express();
 app.set('trust proxy', 1);
 
 const allowedOrigins = [
+  // local dev (common Vite ports)
   "http://localhost:5173",
+  "http://localhost:5174",
   "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   "http://localhost:4173",
   "http://127.0.0.1:4173",
   "https://dadp-elibrary.vercel.app",
@@ -25,6 +28,15 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow any localhost/127.* port during local development
+    if (
+      origin &&
+      process.env.NODE_ENV !== "production" &&
+      /^http:\/\/(localhost|127\.0\.0\.1):\d+$/i.test(origin)
+    ) {
+      callback(null, true);
+      return;
+    }
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -315,6 +327,181 @@ app.post('/api/login', (req, res) => {
     const token = jwt.sign({ sub: row.id, serviceID: row.serviceID, name: row.name, role: row.role }, JWT_SECRET, { expiresIn: '8h' });
     return res.json({ ok: true, token, user: { id: row.id, serviceID: row.serviceID, name: row.name, role: row.role } });
   });
+});
+
+// --- AI Librarian (backend route for local dev / Render) ---
+function normalizeAi(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function chunkTextAi(text, size = 1600, overlap = 250) {
+  const t = String(text || "");
+  if (!t) return [];
+  const out = [];
+  let i = 0;
+  while (i < t.length && out.length < 60) {
+    out.push(t.slice(i, i + size));
+    i += Math.max(1, size - overlap);
+  }
+  return out;
+}
+
+function scoreChunkAi(query, chunk) {
+  const q = normalizeAi(query);
+  const c = normalizeAi(chunk);
+  if (!q || !c) return 0;
+  if (c.includes(q)) return 100;
+  let score = 0;
+  const words = q.split(" ").filter((w) => w.length >= 4);
+  for (const w of words) if (c.includes(w)) score += 6;
+  return score;
+}
+
+async function fetchBookTextAi(fileUrl) {
+  if (!fileUrl || typeof fileUrl !== "string") return null;
+  if (!/^https?:\/\//i.test(fileUrl)) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const r = await fetch(fileUrl, { signal: controller.signal });
+    if (!r.ok) return null;
+
+    const contentType = String(r.headers.get("content-type") || "").toLowerCase();
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 8 * 1024 * 1024) return null;
+
+    const urlLower = fileUrl.toLowerCase();
+    const isPdf = contentType.includes("pdf") || urlLower.endsWith(".pdf");
+    const isDocx =
+      contentType.includes("officedocument") ||
+      urlLower.endsWith(".docx") ||
+      urlLower.endsWith(".doc");
+
+    if (isPdf) {
+      const pdfParse = require("pdf-parse");
+      const parsed = await pdfParse(buf, { max: 15 });
+      return parsed?.text ? String(parsed.text) : null;
+    }
+
+    if (isDocx) {
+      const mammoth = require("mammoth");
+      const result = await mammoth.extractRawText({ buffer: buf });
+      return result?.value ? String(result.value) : null;
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+app.post('/api/librarian-chat', async (req, res) => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    res.status(200).json({
+      reply: "AI mode isn’t configured on this server yet. Set OPENAI_API_KEY to enable book Q&A.",
+      actions: []
+    });
+    return;
+  }
+
+  try {
+    const messages = Array.isArray(req.body?.messages) ? req.body.messages : [];
+    const context = req.body?.context || {};
+    const lastUserMessage =
+      [...messages].reverse().find((m) => m && m.role === "user" && typeof m.content === "string")?.content || "";
+
+    const currentBook = context.currentBook || null;
+    const fileUrl = currentBook?.fileUrl || null;
+
+    const wantsBookAnswer =
+      !!currentBook &&
+      /chapter|summar|summary|doctrine|concept|what|explain|where|define|talk about|discuss/i.test(lastUserMessage);
+
+    let excerpts = null;
+    if (wantsBookAnswer && fileUrl) {
+      const bookText = await fetchBookTextAi(fileUrl);
+      if (bookText) {
+        const chunks = chunkTextAi(bookText, 1600, 250);
+        const scored = chunks
+          .map((ch, idx) => ({ idx, score: scoreChunkAi(lastUserMessage, ch), ch }))
+          .sort((a, b) => b.score - a.score);
+
+        const wantsSummary = /summar|summary|overview|outline/i.test(normalizeAi(lastUserMessage));
+        const top = wantsSummary ? scored.slice(0, 6) : scored.slice(0, 4);
+        excerpts = top
+          .filter((x) => x.score > 0 || wantsSummary)
+          .map((x) => `--- Excerpt ${x.idx + 1} ---\n${x.ch}`)
+          .join("\n\n");
+      }
+    }
+
+    const system = [
+      "You are an AI librarian inside an eLibrary web app.",
+      "Answer the user's question.",
+      "If a currentBook + excerpts are provided, answer using ONLY that content. If the answer isn't in the excerpts, say what keywords to search for in the PDF and where (chapter/section) to look.",
+      "When asked to summarize a book, produce a structured summary.",
+      "Output strict JSON: { reply: string, actions: array }",
+      "",
+      "Current book (if any):",
+      JSON.stringify(currentBook || null),
+      "",
+      "Book excerpts (if available):",
+      excerpts ? excerpts.slice(0, 24000) : "(none)"
+    ].join("\n");
+
+    const openaiMessages = [
+      { role: "system", content: system },
+      ...messages.map((m) => ({
+        role: m.role === "user" ? "user" : "assistant",
+        content: String(m.content || "")
+      }))
+    ];
+
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.2,
+        messages: openaiMessages,
+        response_format: { type: "json_object" }
+      })
+    });
+
+    if (!r.ok) {
+      const text = await r.text();
+      res.status(200).json({
+        reply: "AI is temporarily unavailable. I can still help using smart search.",
+        actions: [],
+        debug: text.slice(0, 500)
+      });
+      return;
+    }
+
+    const data = await r.json();
+    const content = data?.choices?.[0]?.message?.content;
+    let parsed = null;
+    try { parsed = content ? JSON.parse(content) : null; } catch (e) { parsed = null; }
+    const reply = typeof parsed?.reply === "string" ? parsed.reply : "Ask me a question about the book you opened.";
+    const actions = Array.isArray(parsed?.actions) ? parsed.actions : [];
+    res.status(200).json({ reply, actions });
+  } catch (e) {
+    res.status(200).json({
+      reply: "AI is temporarily unavailable. I can still help using smart search.",
+      actions: []
+    });
+  }
 });
 
 // auth middleware

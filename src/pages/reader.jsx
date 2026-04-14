@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { RatingForm, ReviewList } from '../Components/Rating.jsx';
 import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/apiBase";
 
 function Reader({ selectedBook, onBack }) {
   const [readingProgress, setReadingProgress] = useState(0);
@@ -94,7 +94,7 @@ function Reader({ selectedBook, onBack }) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setCurrentUserId(payload.sub);
 
-        const res = await fetch(`${BACKEND_BASE}/api/books/${selectedBook.id}/rating`, {
+        const res = await fetch(`${API_BASE}/api/books/${selectedBook.id}/rating`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -140,7 +140,7 @@ function Reader({ selectedBook, onBack }) {
     if (!token) return false;
 
     try {
-      const res = await fetch(`${BACKEND_BASE}/api/books/${selectedBook.id}/rating`, {
+      const res = await fetch(`${API_BASE}/api/books/${selectedBook.id}/rating`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

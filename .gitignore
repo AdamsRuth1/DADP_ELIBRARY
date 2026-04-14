@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Backend/runtime data (should never be committed)
+server/data.sqlite
+server/*.sqlite
+server/*.db
+*.sqlite
+*.db
+
+# Uploaded files (runtime content)
+public/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

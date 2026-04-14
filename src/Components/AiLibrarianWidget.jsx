@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/apiBase";
 
 function normalize(s) {
   return String(s || "")
@@ -89,7 +88,8 @@ function localBrain({ query, pages, books, currentBook }) {
 
 async function tryServerBrain({ messages, pages, books, currentBook }) {
   try {
-    const res = await fetch("/api/librarian-chat", {
+    const chatUrl = import.meta.env.DEV ? `${API_BASE}/api/librarian-chat` : "/api/librarian-chat";
+    const res = await fetch(chatUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -103,7 +103,13 @@ async function tryServerBrain({ messages, pages, books, currentBook }) {
             category: b.category
           })),
           currentBook: currentBook
-            ? { id: currentBook.id, title: currentBook.title, author: currentBook.author, category: currentBook.category }
+            ? {
+                id: currentBook.id,
+                title: currentBook.title,
+                author: currentBook.author,
+                category: currentBook.category,
+                fileUrl: currentBook.file || null
+              }
             : null
         }
       })
@@ -111,6 +117,16 @@ async function tryServerBrain({ messages, pages, books, currentBook }) {
     if (!res.ok) return null;
     const data = await res.json();
     if (!data || typeof data.reply !== "string") return null;
+    // If the server responds with a "fallback" message, prefer the local brain
+    // so users still get actions like "Open book" without extra prompting.
+    const lower = data.reply.toLowerCase();
+    if (
+      lower.includes("ai is temporarily unavailable") ||
+      lower.includes("isn’t configured yet") ||
+      lower.includes("isn't configured yet")
+    ) {
+      return null;
+    }
     return data;
   } catch {
     return null;
@@ -156,14 +172,14 @@ export default function AiLibrarianWidget({
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch(`${BACKEND_BASE}/api/books`);
+        const res = await fetch(`${API_BASE}/api/books`);
         if (!res.ok) return;
         const data = await res.json();
         if (cancelled) return;
         const mapped = (data || []).map((b) => ({
           ...b,
-          file: b.file ? `${BACKEND_BASE}${b.file}` : b.file,
-          thumbnail: b.thumbnail ? `${BACKEND_BASE}${b.thumbnail}` : null
+          file: b.file ? `${API_BASE}${b.file}` : b.file,
+          thumbnail: b.thumbnail ? `${API_BASE}${b.thumbnail}` : null
         }));
         setBooks(mapped);
       } catch {
@@ -183,6 +199,14 @@ export default function AiLibrarianWidget({
     }
   };
 
+  const getLastAssistantActions = (arr) => {
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const m = arr[i];
+      if (m?.role === "assistant" && Array.isArray(m.actions) && m.actions.length > 0) return m.actions;
+    }
+    return [];
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || sending) return;
@@ -191,6 +215,22 @@ export default function AiLibrarianWidget({
     setMessages(nextMessages);
     setInput("");
     setSending(true);
+
+    // If user is confirming, execute the last suggested action immediately.
+    const normalized = normalize(text);
+    if (/^(ok|okay|yes|yep|sure|do it|do|go ahead|open it|proceed)\b/.test(normalized)) {
+      const actions = getLastAssistantActions(messages);
+      if (actions.length > 0) {
+        runActions([actions[0]]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", content: text },
+          { role: "assistant", content: "Done. I’ve opened it / taken you there.", actions: [] }
+        ]);
+        setSending(false);
+        return;
+      }
+    }
 
     const server = await tryServerBrain({ messages: nextMessages, pages, books, currentBook });
     const result =

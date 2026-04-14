@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// Backend base URL can be configured via Vite env: VITE_API_URL
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/apiBase";
 
 // Helper function to manage recently viewed books
 function addToRecentlyViewed(book) {
@@ -42,13 +41,17 @@ function Library({ onOpenBook }) {
 
     async function fetchBooks() {
       try {
-        const res = await fetch(`${BACKEND_BASE}/api/books`);
+      const res = await fetch(`${API_BASE}/api/books`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (cancelled) return;
 
         // make file URLs absolute so they point to the backend static route
-        const mapped = (data || []).map((b) => ({ ...b, file: `${BACKEND_BASE}${b.file}`, thumbnail: b.thumbnail ? `${BACKEND_BASE}${b.thumbnail}` : null }));
+        const mapped = (data || []).map((b) => ({
+          ...b,
+          file: b.file ? `${API_BASE}${b.file}` : b.file,
+          thumbnail: b.thumbnail ? `${API_BASE}${b.thumbnail}` : null
+        }));
         setBooks(mapped);
       } catch (err) {
         console.error('Failed to load books', err);

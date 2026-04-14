@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/apiBase";
 
 function StarRating({ rating, onRatingChange, readonly = false, size = 'md' }) {
   const [hoverRating, setHoverRating] = useState(0);
@@ -49,7 +48,7 @@ function RatingSummary({ bookId, showDistribution = false }) {
   useEffect(() => {
     async function fetchSummary() {
       try {
-        const res = await fetch(`${BACKEND_BASE}/api/books/${bookId}/rating-summary`);
+        const res = await fetch(`${API_BASE}/api/books/${bookId}/rating-summary`);
         if (res.ok) {
           const data = await res.json();
           setSummary(data);
@@ -156,7 +155,7 @@ function ReviewList({ bookId, currentUserId }) {
   useEffect(() => {
     async function fetchReviews() {
       try {
-        const res = await fetch(`${BACKEND_BASE}/api/books/${bookId}/ratings`);
+        const res = await fetch(`${API_BASE}/api/books/${bookId}/ratings`);
         if (res.ok) {
           const data = await res.json();
           setReviews(data);

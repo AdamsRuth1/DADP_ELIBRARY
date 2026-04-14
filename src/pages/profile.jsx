@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StarRating } from '../Components/Rating.jsx';
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE } from "../config/apiBase";
 
 function Profile({ user, onBack }) {
   const [profile, setProfile] = useState(null);
@@ -23,7 +23,7 @@ function Profile({ user, onBack }) {
           return;
         }
 
-        const res = await fetch(`${BACKEND_BASE}/api/users/${userId}/profile`, {
+        const res = await fetch(`${API_BASE}/api/users/${userId}/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
