@@ -5,16 +5,16 @@
       "title": "History of CCTV",
       "author": "J. Smith",
       "category": "CCTV",
-      "file": "/books/uploads/1775292786964-history-of-cctv.pdf",
-      "thumbnail": "/books/uploads/1775292786975-Screenshot-2026-04-04-095232.png"
+      "file": "/books/history-of-cctv.pdf",
+      "thumbnail": null
     },
     {
       "id": 2,
-      "title": "Nigerian Army Customs and Ethics 2025",
-      "author": "NIGERIAN ARMY",
-      "category": "MILITARY",
-      "file": "/books/uploads/1775293000763-tce.pdf",
-      "thumbnail": "/books/uploads/1775293000785-Screenshot-2026-04-04-095350.png"
+      "title": "Engineering Field Manual",
+      "author": "A. Musa",
+      "category": "Engineering",
+      "file": "/books/tce.pdf",
+      "thumbnail": null
     },
     {
       "id": 3,
@@ -22,15 +22,15 @@
       "author": "K. Ade",
       "category": "Leadership",
       "file": "/books/na-doctrine.pdf",
-      "thumbnail": "/books/uploads/1775293409543-feem_EF6C2_IMG_9648_edited.jpg"
+      "thumbnail": null
     },
     {
       "id": 4,
-      "title": "ARMED FORCES OF NIGERIA JOINT SERVICE WRITING MANUAL",
-      "author": "MINISTRY OF DEFENCE",
-      "category": "MILITARY",
-      "file": "/books/uploads/1775290156093-ARMED-FORCES-OF-NIGERIA-JOINT-SERVICE-WRITING-MANUAL-2025-EDITION.pdf",
-      "thumbnail": "/books/uploads/1775290156195-Screenshot-2026-04-03-173618.png"
+      "title": "Computer Forensics",
+      "author": "Ade",
+      "category": "Forensics",
+      "file": "/books/forensics.docx",
+      "thumbnail": null
     },
     {
       "id": 5,
@@ -38,15 +38,15 @@
       "author": "Ade",
       "category": "AI",
       "file": "/books/ai.docx",
-      "thumbnail": "/books/uploads/aiImage.png"
+      "thumbnail": null
     },
     {
       "id": 6,
-      "title": "Ethical hacking",
+      "title": "Ethical Hacking",
       "author": "Ade",
       "category": "Ethical Hacking",
-      "file": "/books/uploads/1775723541697-ethicalHacking.pdf",
-      "thumbnail": "/books/uploads/1775723541726-Screenshot-2026-04-09-093044.png"
+      "file": "/books/ethicalHacking.docx",
+      "thumbnail": null
     }
   ]
 }
