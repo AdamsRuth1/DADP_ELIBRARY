@@ -23,7 +23,7 @@ function scoreTextMatch(query, text) {
   return score;
 }
 
-function localBrain({ query, pages, books, currentBook, serverUnavailable = false }) {
+function localBrain({ query, pages, books, currentBook }) {
   const q = normalize(query);
   const actions = [];
 
@@ -55,13 +55,10 @@ function localBrain({ query, pages, books, currentBook, serverUnavailable = fals
     actions.unshift({ type: "openBook", book: bestBook });
   }
 
-  const bookQuestion = /(chapter|summar|summary|explain|what|where|define|doctrine|concept|discuss)/.test(q);
-  if (currentBook && bookQuestion) {
+  if (currentBook && /(this book|this|here|in this book)/.test(q)) {
     return {
       reply:
-        serverUnavailable
-          ? "I can’t read inside this book right now because the AI service isn’t reachable/configured. Once `OPENAI_API_KEY` is set on your server, I can answer questions like “summarize chapter 3” directly from the PDF/DOCX."
-          : "Ask your question again and I’ll answer from the book content. If you want, say “summarize this book” or “what does chapter 3 discuss?”.",
+        "Tell me what you’re trying to find and I’ll help. I can also bookmark this moment for you or take you to related books in the Library.",
       actions
     };
   }
@@ -89,7 +86,7 @@ function localBrain({ query, pages, books, currentBook, serverUnavailable = fals
   };
 }
 
-async function tryServerBrain({ messages, pages, books, currentBook, query }) {
+async function tryServerBrain({ messages, pages, books, currentBook }) {
   try {
     const chatUrl = import.meta.env.DEV ? `${API_BASE}/api/librarian-chat` : "/api/librarian-chat";
     const res = await fetch(chatUrl, {
@@ -117,9 +114,9 @@ async function tryServerBrain({ messages, pages, books, currentBook, query }) {
         }
       })
     });
-    if (!res.ok) return { unavailable: true };
+    if (!res.ok) return null;
     const data = await res.json();
-    if (!data || typeof data.reply !== "string") return { unavailable: true };
+    if (!data || typeof data.reply !== "string") return null;
     // If the server responds with a "fallback" message, prefer the local brain
     // so users still get actions like "Open book" without extra prompting.
     const lower = data.reply.toLowerCase();
@@ -128,12 +125,11 @@ async function tryServerBrain({ messages, pages, books, currentBook, query }) {
       lower.includes("isn’t configured yet") ||
       lower.includes("isn't configured yet")
     ) {
-      // Let caller show a helpful message and still provide local actions.
-      return { unavailable: true, data };
+      return null;
     }
     return data;
   } catch {
-    return { unavailable: true };
+    return null;
   }
 }
 
@@ -236,21 +232,17 @@ export default function AiLibrarianWidget({
       }
     }
 
-    const server = await tryServerBrain({ messages: nextMessages, pages, books, currentBook, query: text });
+    const server = await tryServerBrain({ messages: nextMessages, pages, books, currentBook });
     const result =
-      server && server.reply
-        ? server
-        : localBrain({
-            query: text,
-            pages,
-            books,
-            currentBook,
-            serverUnavailable: !!server?.unavailable
-          });
+      server ||
+      localBrain({
+        query: text,
+        pages,
+        books,
+        currentBook
+      });
 
-    const localActions = localBrain({ query: text, pages, books, currentBook }).actions || [];
-    const mergedActions = [...(result.actions || []), ...localActions].slice(0, 3);
-    setMessages((prev) => [...prev, { role: "assistant", content: result.reply, actions: mergedActions }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: result.reply, actions: result.actions || [] }]);
     setSending(false);
   };
 
