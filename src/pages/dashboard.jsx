@@ -7,6 +7,7 @@ import Profile from "./profile";
 import Bookmarks from "./bookmarks";
 import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 import { API_BASE } from "../config/apiBase";
+import BookCover from "../Components/BookCover";
 
 function parseJwt(token) {
   try {
@@ -363,15 +364,9 @@ function Dashboard() {
                       <div
                         key={`${book.id}-${index}`}
                         className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                        style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${book.thumbnail})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                        } : undefined}
                         onClick={() => handleOpenBook(book)}
                       >
-                        <div className="absolute inset-0 bg-black/10" />
+                        <BookCover src={book.thumbnail} title={book.title} category={book.category} />
                         <div className="relative h-full flex flex-col justify-end p-4">
                           <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3">
                             <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>
@@ -410,14 +405,9 @@ function Dashboard() {
                       <div
                         key={`${book.id}-${index}`}
                         className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                        style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${book.thumbnail})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                        } : undefined}
                         onClick={() => handleOpenBook(book)}
                       >
+                        <BookCover src={book.thumbnail} title={book.title} category={book.category} />
                         <div className="absolute top-3 right-3 z-10">
                           <svg
                             className="w-5 h-5 text-red-500"
@@ -433,7 +423,6 @@ function Dashboard() {
                             />
                           </svg>
                         </div>
-                        <div className="absolute inset-0 bg-black/10" />
                         <div className="relative h-full flex flex-col justify-end p-4">
                           <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3">
                             <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>

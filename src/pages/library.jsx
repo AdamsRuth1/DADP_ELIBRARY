@@ -22,6 +22,7 @@ function addToRecentlyViewed(book) {
 }
 
 import { RatingSummary } from '../Components/Rating.jsx';
+import BookCover from "../Components/BookCover";
 
 function Library({ onOpenBook }) {
   const [books, setBooks] = useState([]);
@@ -325,14 +326,9 @@ function Library({ onOpenBook }) {
         {paginatedBooks.map((book) => (
           <div
             key={book.id}
-            className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-96' : 'bg-white p-5'}`}
-            style={book.thumbnail ? {
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url(${book.thumbnail})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            } : undefined}
+            className="relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 h-96 bg-white"
           >
+            <BookCover src={book.thumbnail} title={book.title} category={book.category} />
             {/* Bulk Selection Checkbox */}
             {bulkMode && (
               <div className="absolute top-3 left-3 z-10">
@@ -376,7 +372,6 @@ function Library({ onOpenBook }) {
               </svg>
             </button>
 
-            <div className="absolute inset-0 bg-black/20" />
             <div className="relative flex h-full flex-col justify-end p-5">
               <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-4 shadow-lg">
                 <h2 className="text-lg font-semibold text-gray-900" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h2>
@@ -392,7 +387,7 @@ function Library({ onOpenBook }) {
                     onClick={async () => {
                       try {
                         const token = localStorage.getItem('token');
-                        await fetch(`${BACKEND_BASE}/api/books/${book.id}/view`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                        await fetch(`${API_BASE}/api/books/${book.id}/view`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
                       } catch (e) { /* ignore */ }
                       addToRecentlyViewed(book);
                       onOpenBook(book);
