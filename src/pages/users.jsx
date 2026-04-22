@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Search, Plus, Edit, Trash2, ShieldAlert, BookOpen, AlertCircle, FileText, Image as ImageIcon } from 'lucide-react';
+import { supabase } from '../config/supabaseClient';
 import { API_BASE } from "../config/apiBase";
 
 function parseJwt(token) {
@@ -20,7 +22,9 @@ function UsersPage() {
   const role = jwt ? jwt.role : null;
 
   const [books, setBooks] = useState([]);
-  const [bookForm, setBookForm] = useState({ title: '', author: '', category: '', file: null, thumbnail: null });
+  const [bookForm, setBookForm] = useState({ title: '', author: '', category: '', files: [], thumbnail: null });
+  const [uploadQueue, setUploadQueue] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [editingUserId, setEditingUserId] = useState(null);
   const [editUserForm, setEditUserForm] = useState({ name: '', password: '', role: 'User' });
@@ -93,9 +97,9 @@ function UsersPage() {
   }
 
   async function handleBookFileChange(e, setterName) {
-    const file = e.target.files && e.target.files[0];
-    if (setterName === 'book') setBookForm({...bookForm, file});
-    else setEditBookForm({...editBookForm, file});
+    const files = e.target.files;
+    if (setterName === 'book') setBookForm({...bookForm, files: Array.from(files)});
+    else setEditBookForm({...editBookForm, file: files[0]});
   }
 
   async function handleThumbnailChange(e, setterName) {
@@ -104,23 +108,89 @@ function UsersPage() {
     else setEditBookForm({...editBookForm, thumbnail: file});
   }
 
-  async function createBook(e) {
+  function queueBook(e) {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('title', bookForm.title);
-    formData.append('author', bookForm.author);
-    formData.append('category', bookForm.category || '');
-    if (bookForm.file) formData.append('pdf', bookForm.file);
-    if (bookForm.thumbnail) formData.append('thumbnail', bookForm.thumbnail);
+    if (!bookForm.files || bookForm.files.length === 0) return alert('No PDF selected');
 
-    const res = await fetch(`${API_BASE}/api/books`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
-    if (res.ok) {
-      setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
-      setBookModal({ open: false, mode: 'add', book: null });
-      fetchBooks();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to add book');
+    // Push into queue
+    setUploadQueue([...uploadQueue, {
+      title: bookForm.title,
+      author: bookForm.author || 'Unknown',
+      category: bookForm.category || '',
+      file: bookForm.files[0],
+      thumbnail: bookForm.thumbnail
+    }]);
+
+    // Clear form to allow entry of the next book immediately
+    setBookForm({ title: '', author: '', category: '', files: [], thumbnail: null });
+  }
+
+  function removeQueuedBook(index) {
+    setUploadQueue(uploadQueue.filter((_, i) => i !== index));
+  }
+
+  async function dispatchQueue() {
+    if (uploadQueue.length === 0) return alert('No books in queue');
+    setIsUploading(true);
+
+    try {
+        for (let i = 0; i < uploadQueue.length; i++) {
+            const item = uploadQueue[i];
+            
+            const titleToUse = item.title || item.file.name.replace(/\.[^/.]+$/, "");
+                
+            // 1. Upload PDF to Supabase
+            const pdfId = `${Date.now()}-${item.file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+            const { error: pdfError } = await supabase.storage.from('books').upload(pdfId, item.file);
+            
+            if (pdfError) throw new Error(`PDF Upload Failed for ${titleToUse}: ${pdfError.message}`);
+            
+            const pdfUrl = supabase.storage.from('books').getPublicUrl(pdfId).data.publicUrl;
+
+            // 2. Upload Thumbnail to Supabase Storage
+            let thumbnailUrl = null;
+            if (item.thumbnail) {
+               const thumbId = `${Date.now()}-${item.thumbnail.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+               const { error: thumbError } = await supabase.storage.from('thumbnails').upload(thumbId, item.thumbnail);
+                 
+               if (thumbError) throw new Error(`Thumbnail failed for ${titleToUse}: ${thumbError.message}`);
+               thumbnailUrl = supabase.storage.from('thumbnails').getPublicUrl(thumbId).data.publicUrl;
+            }
+
+            // 3. Send metadata URLs to backend database
+            const payload = {
+                title: titleToUse,
+                author: item.author,
+                category: item.category,
+                pdf_url: pdfUrl,
+                thumbnail_url: thumbnailUrl
+            };
+
+            const res = await fetch(`${API_BASE}/api/books`, { 
+                method: 'POST', 
+                headers: { 
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}` 
+                }, 
+                body: JSON.stringify(payload) 
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `Failed securely saving book: ${titleToUse}`);
+            }
+        }
+        
+        // Success
+        setUploadQueue([]);
+        setBookForm({ title: '', author: '', category: '', files: [], thumbnail: null });
+        setBookModal({ open: false, mode: 'add', book: null });
+        fetchBooks();
+        alert(`Successfully deployed ${uploadQueue.length} books to the library!`);
+    } catch(err) {
+        console.error('Upload err:', err);
+        alert(err.message || "An error occurred during bulk upload.");
+    } finally {
+        setIsUploading(false);
     }
   }
 
@@ -131,7 +201,7 @@ function UsersPage() {
 
   function openAddBookModal() {
     setBookModal({ open: true, mode: 'add', book: null });
-    setBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+    setBookForm({ title: '', author: '', category: '', files: [], thumbnail: null });
   }
 
   async function updateBook(id) {
@@ -537,7 +607,7 @@ function UsersPage() {
                 {bookModal.mode === 'add' ? 'Add New Book' : 'Edit Book'}
               </h3>
 
-              <form onSubmit={bookModal.mode === 'add' ? createBook : (e) => { e.preventDefault(); updateBook(bookModal.book.id); }}>
+              <form onSubmit={bookModal.mode === 'add' ? queueBook : (e) => { e.preventDefault(); updateBook(bookModal.book.id); }}>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Title</label>
@@ -589,6 +659,12 @@ function UsersPage() {
                     />
                   </div>
 
+                  {bookModal.mode === 'add' && (
+                  <div>
+                    <p className="text-xs text-blue-600 mb-2 font-medium">Bulk Upload Wizard: Fill details below, click "Queue Next Book", and repeat. When finished, hit "Launch Batch".</p>
+                  </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium mb-1">PDF File {bookModal.mode === 'add' && '(required)'}</label>
                     <input
@@ -611,20 +687,58 @@ function UsersPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 mt-6">
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                    onClick={() => setBookModal({ open: false, mode: 'add', book: null })}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    {bookModal.mode === 'add' ? 'Add Book' : 'Save Changes'}
-                  </button>
+                <div className="flex justify-between items-center mt-6">
+                  <div>
+                      {bookModal.mode === 'add' && uploadQueue.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-bold text-green-700 bg-green-100 px-3 py-1 rounded-md border border-green-300 shadow-sm">
+                            {uploadQueue.length} in Queue
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                  <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        onClick={() => {
+                          setBookModal({ open: false, mode: 'add', book: null });
+                          setUploadQueue([]);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      
+                      {bookModal.mode === 'add' ? (
+                        <>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                            disabled={isUploading}
+                          >
+                            Queue Next Book
+                          </button>
+                          
+                          {uploadQueue.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={dispatchQueue}
+                                disabled={isUploading}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-bold"
+                              >
+                                {isUploading ? 'Deploying...' : `Launch Batch (${uploadQueue.length})`}
+                              </button>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                          Save Changes
+                        </button>
+                      )}
+                  </div>
                 </div>
               </form>
             </div>

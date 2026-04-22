@@ -60,7 +60,10 @@ app.use(express.json());
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'db.json');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
-const SQLITE_PATH = process.env.SQLITE_PATH || path.join(__dirname, 'data.sqlite');
+const SQLITE_PATH = process.env.SQLITE_PATH || (process.env.VERCEL ? '/tmp/data.sqlite' : path.join(__dirname, 'data.sqlite'));
+
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 // sqlite for users (lightweight)
 const sqlite3 = require('sqlite3').verbose();
@@ -188,24 +191,26 @@ function saveDB(db) {
 }
 
 // Simple API: list books
-app.get('/api/books', (req, res) => {
-  const db = loadDB();
-  res.json(db.books || []);
+app.get('/api/books', async (req, res) => {
+  const { data, error } = await supabase.from('books').select('*');
+  if (error) {
+    console.error('Supabase fetch error:', error);
+    return res.status(500).json({ error: 'Failed to fetch books from Supabase' });
+  }
+  res.json(data || []);
 });
 
 // get book by id
-app.get('/api/books/:id', (req, res) => {
+app.get('/api/books/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const db = loadDB();
-  const book = (db.books || []).find((b) => b.id === id);
-  if (!book) return res.status(404).json({ error: 'Book not found' });
-  res.json(book);
+  const { data, error } = await supabase.from('books').select('*').eq('id', id).single();
+  if (error || !data) return res.status(404).json({ error: 'Book not found' });
+  res.json(data);
 });
 
 // record a view for a book (optional auth)
-app.post('/api/books/:id/view', (req, res) => {
+app.post('/api/books/:id/view', async (req, res) => {
   const id = Number(req.params.id);
-  // try to read token if present but do not require it
   const auth = req.headers.authorization || '';
   let actorId = null;
   const match = auth.match(/^Bearer (.+)$/);
@@ -213,99 +218,75 @@ app.post('/api/books/:id/view', (req, res) => {
     try {
       const payload = jwt.verify(match[1], JWT_SECRET);
       actorId = payload.sub;
-    } catch (e) {
-      // invalid token -> treat as anonymous
-    }
+    } catch (e) {}
   }
-  // ensure book exists
-  const db = loadDB();
-  const book = (db.books || []).find((b) => b.id === id);
+  
+  const { data: book } = await supabase.from('books').select('title').eq('id', id).single();
   if (!book) return res.status(404).json({ error: 'Book not found' });
 
   try { logActivity(actorId, 'view_book', 'book', id, JSON.stringify({ title: book.title })); } catch (e) { console.error(e); }
   res.json({ ok: true });
 });
 
-// create book (supports multipart form-data uploads 'pdf' and 'thumbnail')
-app.post('/api/books', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), upload.fields([{ name: 'pdf', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]), (req, res) => {
-  // Accept both multipart and JSON for backwards compatibility
-  const isMulti = !!req.files;
+// create book - expects {title, author, category, pdf_url, thumbnail_url} injected from frontend now
+app.post('/api/books', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), async (req, res) => {
   const body = req.body || {};
-  const title = body.title;
-  const author = body.author;
-  const category = body.category || '';
-
-  let filePath = body.file; // for old JSON clients
-  if (isMulti && req.files['pdf'] && req.files['pdf'][0]) {
-    filePath = `/books/uploads/${req.files['pdf'][0].filename}`;
-  }
-  let thumbnailPath = body.thumbnail || null;
-  if (isMulti && req.files['thumbnail'] && req.files['thumbnail'][0]) {
-    thumbnailPath = `/books/uploads/${req.files['thumbnail'][0].filename}`;
+  const { title, author, category, pdf_url, thumbnail_url } = body;
+  
+  if (!title || !author || !pdf_url) {
+    return res.status(400).json({ error: 'Missing required Supabase fields: title, author, pdf_url' });
   }
 
-  if (!title || !author || !filePath) {
-    return res.status(400).json({ error: 'Missing required fields: title, author, file/pdf' });
+  const { data, error } = await supabase.from('books').insert([{
+    title, author, category: category || '', file: pdf_url, thumbnail: thumbnail_url
+  }]).select();
+
+  if (error || !data) {
+    console.error("Failed to insert book to supabase:", error);
+    return res.status(500).json({ error: 'Failed to save book permanently to Postgres' });
   }
 
-  const db = loadDB();
-  const books = db.books || [];
-  const nextId = books.length ? Math.max(...books.map((b) => b.id)) + 1 : 1;
-  const newBook = { id: nextId, title, author, category, file: filePath, thumbnail: thumbnailPath };
-  books.push(newBook);
-  db.books = books;
-
-  if (!saveDB(db)) return res.status(500).json({ error: 'Failed to save book' });
-
-  try { logActivity(req.user && req.user.sub, 'create_book', 'book', newBook.id, JSON.stringify({ title: newBook.title })); } catch (e) {}
-  res.status(201).json(newBook);
+  try { logActivity(req.user && req.user.sub, 'create_book', 'book', data[0].id, JSON.stringify({ title: data[0].title })); } catch (e) {}
+  res.status(201).json(data[0]);
 });
 
 // protect create/update/delete with auth (Admin or SuperAdmin)
-// update book - support multipart for updating pdf/thumbnail
-app.put('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), upload.fields([{ name: 'pdf', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]), (req, res) => {
+// update book
+app.put('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), async (req, res) => {
   const id = Number(req.params.id);
-  const isMulti = !!req.files;
   const body = req.body || {};
-  const { title, author, category } = body;
-  let file = body.file;
-  let thumbnail = body.thumbnail;
-  if (isMulti && req.files['pdf'] && req.files['pdf'][0]) file = `/books/uploads/${req.files['pdf'][0].filename}`;
-  if (isMulti && req.files['thumbnail'] && req.files['thumbnail'][0]) thumbnail = `/books/uploads/${req.files['thumbnail'][0].filename}`;
+  
+  // They might only update metadata, so check if pdf_url/thumbnail_url are present.
+  const updateData = {};
+  if (body.title) updateData.title = body.title;
+  if (body.author) updateData.author = body.author;
+  if (body.category !== undefined) updateData.category = body.category;
+  if (body.pdf_url) updateData.file = body.pdf_url;
+  if (body.thumbnail_url !== undefined) updateData.thumbnail = body.thumbnail_url;
 
-  const db = loadDB();
-  const books = db.books || [];
-  const idx = books.findIndex((b) => b.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Book not found' });
+  const { data, error } = await supabase.from('books').update(updateData).eq('id', id).select();
 
-  const updated = { ...books[idx] };
-  if (title !== undefined) updated.title = title;
-  if (author !== undefined) updated.author = author;
-  if (category !== undefined) updated.category = category;
-  if (file !== undefined) updated.file = file;
-  if (thumbnail !== undefined) updated.thumbnail = thumbnail;
+  if (error || !data || data.length === 0) {
+    return res.status(404).json({ error: 'Book not found or failed to update' });
+  }
 
-  books[idx] = updated;
-  db.books = books;
-
-  if (!saveDB(db)) return res.status(500).json({ error: 'Failed to save book' });
-  try { logActivity(req.user && req.user.sub, 'update_book', 'book', updated.id, JSON.stringify({ title: updated.title })); } catch (e) {}
-  res.json(updated);
+  try { logActivity(req.user.sub, 'update_book', 'book', id, JSON.stringify({ title: updateData.title || '' })); } catch (e) {}
+  res.json(data[0]);
 });
 
-app.delete('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), (req, res) => {
+// delete book
+app.delete('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), async (req, res) => {
   const id = Number(req.params.id);
-  const db = loadDB();
-  const books = db.books || [];
-  const idx = books.findIndex((b) => b.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Book not found' });
 
-  const removed = books.splice(idx, 1)[0];
-  db.books = books;
+  const { data: bookDetails } = await supabase.from('books').select('title').eq('id', id).single();
+  const { error } = await supabase.from('books').delete().eq('id', id);
 
-  if (!saveDB(db)) return res.status(500).json({ error: 'Failed to save book' });
-  try { logActivity(req.user && req.user.sub, 'delete_book', 'book', removed.id, JSON.stringify({ title: removed.title })); } catch (e) {}
-  res.json({ ok: true, removed });
+  if (error) {
+    return res.status(404).json({ error: 'Book not found or failed to delete' });
+  }
+
+  try { logActivity(req.user.sub, 'delete_book', 'book', id, JSON.stringify({ title: bookDetails ? bookDetails.title : '' })); } catch (e) {}
+  res.json({ ok: true });
 });
 
 // (duplicate unprotected update/delete removed - protected routes used above)
@@ -329,11 +310,12 @@ app.post('/api/login', (req, res) => {
     }
     if (!row) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
 
-    const match = bcrypt.compareSync(password, row.passwordHash);
-    if (!match) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
-
-    const token = jwt.sign({ sub: row.id, serviceID: row.serviceID, name: row.name, role: row.role }, JWT_SECRET, { expiresIn: '8h' });
-    return res.json({ ok: true, token, user: { id: row.id, serviceID: row.serviceID, name: row.name, role: row.role } });
+    bcrypt.compare(password, row.passwordHash, (err, match) => {
+      if (err || !match) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+      
+      const token = jwt.sign({ sub: row.id, serviceID: row.serviceID, name: row.name, role: row.role }, JWT_SECRET, { expiresIn: '8h' });
+      return res.json({ ok: true, token, user: { id: row.id, serviceID: row.serviceID, name: row.name, role: row.role } });
+    });
   });
 });
 
@@ -562,12 +544,14 @@ app.post('/api/users', authenticateJWT, requireRole('Admin','SuperAdmin'), (req,
   const creatorRole = req.user && req.user.role;
   const assignedRole = (creatorRole === 'Admin') ? 'User' : (role || 'User');
 
-  const hash = bcrypt.hashSync(password, 10);
-  sqlitedb.run(`INSERT INTO users (serviceID, name, passwordHash, role) VALUES (?, ?, ?, ?)`, [serviceID, name || '', hash, assignedRole], function(err) {
-    if (err) return res.status(500).json({ error: 'DB error', details: err.message });
-    const newId = this.lastID;
-    logActivity(req.user && req.user.sub, 'create_user', 'user', newId, JSON.stringify({ serviceID, role: assignedRole }));
-    res.status(201).json({ id: newId, serviceID, name, role: assignedRole });
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) return res.status(500).json({ error: 'Failed to hash password' });
+    sqlitedb.run(`INSERT INTO users (serviceID, name, passwordHash, role) VALUES (?, ?, ?, ?)`, [serviceID, name || '', hash, assignedRole], function(err) {
+      if (err) return res.status(500).json({ error: 'DB error', details: err.message });
+      const newId = this.lastID;
+      logActivity(req.user && req.user.sub, 'create_user', 'user', newId, JSON.stringify({ serviceID, role: assignedRole }));
+      res.status(201).json({ id: newId, serviceID, name, role: assignedRole });
+    });
   });
 });
 
@@ -584,17 +568,31 @@ app.put('/api/users/:id', authenticateJWT, requireRole('Admin','SuperAdmin'), (r
 
     const updates = [];
     const params = [];
-    if (name !== undefined) { updates.push('name = ?'); params.push(name); }
-    if (password !== undefined) { updates.push('passwordHash = ?'); params.push(bcrypt.hashSync(password,10)); }
-    if (role !== undefined && requesterRole === 'SuperAdmin') { updates.push('role = ?'); params.push(role); }
-    if (updates.length === 0) return res.status(400).json({ error: 'Nothing to update' });
+    
+    // helper to finish execution
+    const executeUpdate = () => {
+      if (role !== undefined && requesterRole === 'SuperAdmin') { updates.push('role = ?'); params.push(role); }
+      if (updates.length === 0) return res.status(400).json({ error: 'Nothing to update' });
 
-    params.push(id);
-    sqlitedb.run(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params, function(err2) {
-      if (err2) return res.status(500).json({ error: 'DB error', details: err2.message });
-      logActivity(req.user && req.user.sub, 'update_user', 'user', id, JSON.stringify({ name, role: newRole }));
-      res.json({ ok: true });
-    });
+      params.push(id);
+      sqlitedb.run(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params, function(err2) {
+        if (err2) return res.status(500).json({ error: 'DB error', details: err2.message });
+        logActivity(req.user && req.user.sub, 'update_user', 'user', id, JSON.stringify({ name, role: newRole }));
+        res.json({ ok: true });
+      });
+    };
+
+    if (name !== undefined) { updates.push('name = ?'); params.push(name); }
+    if (password !== undefined) { 
+      bcrypt.hash(password, 10, (err, hash) => {
+        if (err) return res.status(500).json({ error: 'Hashing failed' });
+        updates.push('passwordHash = ?'); 
+        params.push(hash);
+        executeUpdate();
+      });
+    } else {
+      executeUpdate();
+    }
   });
 });
 

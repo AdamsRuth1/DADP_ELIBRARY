@@ -2,21 +2,16 @@ import React from "react";
 import NavBar from "./navigation";
 import Logo from "../assets/cyberwarfareLogo.png";
 import Coreresponsibility from "./coreResponsibility";
-import HowItWorks from "../LandingPage/working"
-import InclusiveAccess from "../LandingPage/inclusiveAccess"
-import LibraryCategories from "../LandingPage/libraryCategories"
-import LandingPageEnding from "../LandingPage/landingPageEnding"
+import HowItWorks from "../LandingPage/working";
+import InclusiveAccess from "../LandingPage/inclusiveAccess";
+import LibraryCategories from "../LandingPage/libraryCategories";
+import LandingPageEnding from "../LandingPage/landingPageEnding";
+
 function LandingPage() {
   return (
     <div className="relative bg-[#F5F6F4]">
-      {/* Background layer */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <img
-          src={Logo}
-          alt=""
-          className="w-[500px] opacity-5 select-none"
-        />
-      </div>
+      {/* Background Army Watermark Layer */}
+      <div className="army-watermark"></div>
 
       {/* Page content */}
       <div className="relative z-10">
@@ -39,14 +34,14 @@ function LandingPage() {
                 <div className="mt-8 flex gap-4">
                   <a
                     href="/login"
-                    className="bg-[#1F3D2B] text-white px-6 py-3 rounded-xl font-semibold"
+                    className="bg-[#1F3D2B] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#162c1f] transition-all"
                   >
                     Access Library
                   </a>
 
                   <a
                     href="#features"
-                    className="border border-gray-300 px-6 py-3 rounded-xl font-semibold text-[#1F3D2B]"
+                    className="border border-gray-300 px-6 py-3 rounded-xl font-semibold text-[#1F3D2B] hover:bg-white hover:shadow transition-all"
                   >
                     Learn More
                   </a>
