@@ -175,8 +175,14 @@ function UsersPage() {
                 body: JSON.stringify(payload) 
             });
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || `Failed securely saving book: ${titleToUse}`);
+                let errText;
+                try {
+                   const errJson = await res.json();
+                   errText = errJson.error;
+                } catch(parseErr) {
+                   errText = `Server returned ${res.status} ${res.statusText}`;
+                }
+                throw new Error(errText || `Failed securely saving book: ${titleToUse}`);
             }
         }
         
@@ -607,7 +613,7 @@ function UsersPage() {
                 {bookModal.mode === 'add' ? 'Add New Book' : 'Edit Book'}
               </h3>
 
-              <form onSubmit={bookModal.mode === 'add' ? queueBook : (e) => { e.preventDefault(); updateBook(bookModal.book.id); }}>
+              <form key={uploadQueue.length} onSubmit={bookModal.mode === 'add' ? queueBook : (e) => { e.preventDefault(); updateBook(bookModal.book.id); }}>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Title</label>
