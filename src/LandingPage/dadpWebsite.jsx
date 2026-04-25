@@ -1,5 +1,6 @@
 import React from "react";
 import DadpNavigation from "./dadpNavigation";
+import DadpLeadership from "./dadpLeadership";
 import DadpHero from "./dadpHero";
 import DadpAbout from "./dadpAbout";
 import DadpCommand from "./dadpCommand";
@@ -17,6 +18,7 @@ export default function DadpWebsite() {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <DadpNavigation />
+        <DadpLeadership />
         <DadpHero />
         <DadpAbout />
         <DadpCommand />
