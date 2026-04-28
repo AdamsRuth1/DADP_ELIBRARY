@@ -1,11 +1,10 @@
 import React from "react";
 import Classroom1 from "../assets/ClassRoom.jpeg"
 import Practical from "../assets/Practical.jpeg"
-const CLASSROOM_3 = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-const CLASSROOM_4 = "https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-const CLASSROOM_5 = "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-const CLASSROOM_6 = "https://images.unsplash.com/photo-1571260899304-425dea4cf36e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-
+import Classroom4 from "../assets/IMG-20260415-WA0065 - Copy.jpg"
+import Classroom2 from "../assets/20260216_101719.jpg"
+import Classroom5 from "../assets/IMG-20260129-WA0057.jpg"
+import Classroom6 from "../assets/IMG-20260129-WA0038.jpg"
 export default function DadpActivities() {
   return (
     <section className="bg-slate-900 text-white py-20" id="activities">
@@ -40,10 +39,12 @@ export default function DadpActivities() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <img src={Classroom1} alt="Classroom 1" className="rounded-xl object-cover h-32 w-full shadow-lg" />
             <img src={Practical} alt="Classroom 2" className="rounded-xl object-cover h-40 w-full shadow-lg translate-y-4" />
-            <img src={CLASSROOM_3} alt="Classroom 3" className="rounded-xl object-cover h-32 w-full shadow-lg" />
-            <img src={CLASSROOM_4} alt="Classroom 4" className="rounded-xl object-cover h-40 w-full shadow-lg -translate-y-4 sm:translate-y-8" />
-            <img src={CLASSROOM_5} alt="Classroom 5" className="rounded-xl object-cover h-32 w-full shadow-lg translate-y-2 sm:-translate-y-0" />
-            <img src={CLASSROOM_6} alt="Classroom 6" className="rounded-xl object-cover h-40 w-full shadow-lg translate-y-6 sm:translate-y-12" />
+            <img src={Classroom2} alt="Classroom 3" className="rounded-xl object-cover h-32 w-full shadow-lg" />
+            <img src={Classroom4} alt="Classroom 4" className="rounded-xl object-cover h-40 w-full shadow-lg -translate-y-4 sm:translate-y-8" />
+            <img src={Classroom6} alt="Classroom 4" className="rounded-xl object-cover h-40 w-full shadow-lg -translate-y-4 sm:translate-y-8" />
+            <img src={Classroom5} alt="Classroom 4" className="rounded-xl object-cover h-40 w-full shadow-lg -translate-y-4 sm:translate-y-8" />
+
+
           </div>
         </div>
       </div>

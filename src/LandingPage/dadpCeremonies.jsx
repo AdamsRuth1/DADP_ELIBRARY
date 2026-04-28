@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Classroom2 from "../assets/IMG-20260407-WA0086.jpg"
 
 const CEREMONY_1 = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 const CEREMONY_2 = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
@@ -6,12 +7,12 @@ const CEREMONY_3 = "https://images.unsplash.com/photo-1512820790803-83ca734da794
 
 export default function DadpCeremonies() {
   const [currentCeremony, setCurrentCeremony] = useState(0);
-  const ceremonies = [CEREMONY_1, CEREMONY_2, CEREMONY_3];
+  const ceremonies = [Classroom2, CEREMONY_2, CEREMONY_3];
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentCeremony((prev) => (prev + 1) % ceremonies.length);
-    }, 4500); 
+    }, 4500);
     return () => clearInterval(timer);
   }, [ceremonies.length]);
 

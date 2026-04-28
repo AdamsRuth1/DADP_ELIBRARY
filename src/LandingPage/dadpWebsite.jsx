@@ -21,7 +21,7 @@ export default function DadpWebsite() {
         <DadpLeadership />
         <DadpHero />
         <DadpAbout />
-        <DadpCommand />
+        {/* <DadpCommand /> */}
         <DadpCourses />
         <DadpInstructors />
         <DadpPartnerships />

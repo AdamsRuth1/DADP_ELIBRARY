@@ -1,14 +1,12 @@
 import React, { useState } from "react";
- import CommanderImage from "../assets/NACWC COMD.jpeg";
- import DirectorImage from "../assets/Director.png";
+import CommanderImage from "../assets/NACWC COMD.jpeg";
+import DirectorImage from "../assets/Director.png";
 
 export default function DadpLeadership() {
   const [commanderVision, setCommanderVision] = useState(
     " To Defend The Nigeria Army's Cyberspace, Attack And Neutalize Hostile Digital Threats, And Exploit Cyber Capabilities To Safeguard National Interests, Support Land Operations, And Accomplish Tasks In Aid Of Civil Autority"
   );
-  const [directorVision, setDirectorVision] = useState(
-    "DADP will transform personnel into elite system administrators capable of managing large datasets, securing networks, and delivering operational readiness in a modern defense environment."
-  );
+
 
   return (
     <section className="bg-[#F5F6F4] py-16 border-b border-gray-200">
@@ -18,7 +16,7 @@ export default function DadpLeadership() {
           <h1 className="text-4xl md:text-5xl font-extrabold text-[#1F3D2B] mt-4">
             Commander and Director Spotlight
           </h1>
-         
+
         </div>
 
         <div className="grid gap-10 lg:grid-cols-2">
@@ -71,14 +69,6 @@ export default function DadpLeadership() {
                   </div>
                 </div>
               </div>
-
-              <label className="block  font-bold text-gray-700 mt-6 mb-2"> VISION</label>
-              <textarea
-                value={directorVision}
-                onChange={(event) => setDirectorVision(event.target.value)}
-                rows={5}
-                className="w-full rounded-3xl border border-gray-200 p-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B]"
-              />
             </div>
           </div>
         </div>

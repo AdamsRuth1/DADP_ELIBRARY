@@ -2,7 +2,6 @@ import React from "react";
 import IctImage from "../assets/IMG_0936.jpeg";
 import ICTExam from "../assets/IMG_0937.jpeg";
 import GOCVisitImage from "../assets/GOCVISIT.jpg";
-import CbtExamImage from "../assets/ClassRoom.jpeg";
 import InaugurationImage from "../assets/INUGURATION.jpg";
 import PracticalImage from "../assets/IED.jpeg";
 
@@ -67,9 +66,7 @@ export default function DadpHero() {
               <p className="text-sm uppercase tracking-[0.3em] text-[#C5A64D]">Event Highlights</p>
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#1F3D2B] mt-3">Latest DADP Activities</h2>
             </div>
-            <p className="max-w-2xl text-gray-600">
-              GOC visit, CBT exam coverage, new student inauguration and practical IED detection sessions are highlighted here with event photos.
-            </p>
+
           </div>
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
             {events.map((event) => (
