@@ -18,6 +18,7 @@ export default function LoginPage({ setPage }) {
   const handleLogin = async () => {
     if (!serviceID || !password) return alert('Please enter both Service ID and Password.');
     setLoading(true);
+    console.log('Login hitting:', `${API}/api/login`);
     try {
       const res = await fetch(`${API}/api/login`, {
         method: 'POST',
@@ -32,7 +33,7 @@ export default function LoginPage({ setPage }) {
       if (data.token) localStorage.setItem('token', data.token);
       navigate('/dashboard');
     } catch (err) {
-      console.error('login error', err);
+      console.error('Full login error details:', err);
       alert('Login failed (network)');
     } finally {
       setLoading(false);
