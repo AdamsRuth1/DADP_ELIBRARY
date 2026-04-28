@@ -181,6 +181,7 @@ function UsersPage() {
                 thumbnail_url: thumbnailUrl
             };
 
+            console.log('Hitting API:', `${API_BASE}/api/books`);
             const res = await fetch(`${API_BASE}/api/books`, { 
                 method: 'POST', 
                 headers: { 
