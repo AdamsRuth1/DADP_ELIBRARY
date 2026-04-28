@@ -1,6 +1,12 @@
 {
   "installCommand": "npm install",
   "buildCommand": "npm run build",
+  "functions": {
+    "vercel-api.cjs": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/vercel-api.cjs" },
     { "source": "/(.*)", "destination": "/index.html" }
