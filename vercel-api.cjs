@@ -1,4 +1,4 @@
-const { app, loadDB } = require('../server/app');
+const { app, loadDB } = require('./server/app');
 
 if (typeof loadDB === 'function') {
   loadDB();
