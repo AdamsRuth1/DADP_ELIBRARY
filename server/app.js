@@ -239,7 +239,7 @@ app.post('/api/books', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin')
   if (!pdf_url) missing.push('pdf_url');
 
   if (missing.length > 0) {
-    return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` });
+    return res.status(400).json({ error: `[fixed-backend] Missing required fields: ${missing.join(', ')}` });
   }
 
   const { data, error } = await supabase.from('books').insert([{
