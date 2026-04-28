@@ -79,14 +79,20 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 
-// file upload middleware (store uploads under frontend public so served at /books/uploads)
+// file upload middleware
 const multer = require('multer');
-const uploadDir = path.join(PUBLIC_DIR, 'uploads');
-try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
-const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g,'-'))
-});
+const uploadDir = process.env.VERCEL ? '/tmp' : path.join(PUBLIC_DIR, 'uploads');
+if (!process.env.VERCEL) {
+  try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
+}
+
+const storage = process.env.VERCEL 
+  ? multer.memoryStorage() 
+  : multer.diskStorage({
+      destination: uploadDir,
+      filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g,'-'))
+    });
+
 const upload = multer({ storage });
 // initialize sqlite DB and ensure users table exists
 const sqlitedb = new sqlite3.Database(SQLITE_PATH);
