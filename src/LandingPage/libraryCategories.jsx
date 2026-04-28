@@ -49,10 +49,11 @@ function LibraryCategories() {
   ];
 
   return (
-    <section id="categories" className="bg-white py-20">
+    <section id="categories" className="bg-white py-6">
       <div className="max-w-7xl mx-auto px-6">
         {/* Heading */}
-        <div className="max-w-3xl mx-auto text-center mb-16">
+        <div className="max-w-3xl mx-auto text-center mb-8">
+          <img src="/army logo.jpeg" alt="" className="h-12 w-12 mx-auto mb-4 opacity-80" />
           <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-[#163021]">
             Library Categories
           </h2>

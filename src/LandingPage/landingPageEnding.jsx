@@ -5,9 +5,10 @@ function LandingPageEnding() {
   return (
     <>
       {/* Final CTA Section */}
-      <section className="bg-[#F5F6F4] py-24">
+      <section className="bg-[#F5F6F4] py-6">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="rounded-[32px] bg-gradient-to-r from-[#173122] via-[#1F3D2B] to-[#244633] px-8 py-14 md:px-12 md:py-16 text-center shadow-xl shadow-[#1F3D2B]/20">
+          <div className="rounded-[32px] bg-gradient-to-r from-[#173122] via-[#1F3D2B] to-[#244633] px-8 py-10 md:px-12 md:py-12 text-center shadow-xl shadow-[#1F3D2B]/20">
+            <img src="/army logo.jpeg" alt="" className="h-14 w-14 mx-auto mb-6 bg-white rounded-full p-1" />
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#C5A64D]">
               Secure Access
             </p>

@@ -233,8 +233,13 @@ app.post('/api/books', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin')
   const body = req.body || {};
   const { title, author, category, pdf_url, thumbnail_url } = body;
   
-  if (!title || !author || !pdf_url) {
-    return res.status(400).json({ error: 'Missing required Supabase fields: title, author, pdf_url' });
+  const missing = [];
+  if (!title) missing.push('title');
+  if (!author) missing.push('author');
+  if (!pdf_url) missing.push('pdf_url');
+
+  if (missing.length > 0) {
+    return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` });
   }
 
   const { data, error } = await supabase.from('books').insert([{
@@ -251,12 +256,11 @@ app.post('/api/books', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin')
 });
 
 // protect create/update/delete with auth (Admin or SuperAdmin)
-// update book
+// update book - expects JSON {title, author, category, pdf_url, thumbnail_url}
 app.put('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmin'), async (req, res) => {
   const id = Number(req.params.id);
   const body = req.body || {};
   
-  // They might only update metadata, so check if pdf_url/thumbnail_url are present.
   const updateData = {};
   if (body.title) updateData.title = body.title;
   if (body.author) updateData.author = body.author;
@@ -264,9 +268,14 @@ app.put('/api/books/:id', maybeAuthenticate, maybeRequireRole('Admin','SuperAdmi
   if (body.pdf_url) updateData.file = body.pdf_url;
   if (body.thumbnail_url !== undefined) updateData.thumbnail = body.thumbnail_url;
 
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
   const { data, error } = await supabase.from('books').update(updateData).eq('id', id).select();
 
   if (error || !data || data.length === 0) {
+    console.error("Failed to update book in supabase:", error);
     return res.status(404).json({ error: 'Book not found or failed to update' });
   }
 

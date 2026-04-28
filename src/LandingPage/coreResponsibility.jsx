@@ -30,11 +30,12 @@ function CoreResponsibility() {
   ];
 
   return (
-    <section className="bg-[#F5F6F4] py-20">
+    <section className="bg-[#F5F6F4] py-6">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Title */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
+          <img src="/army logo.jpeg" alt="" className="h-12 w-12 mx-auto mb-4 opacity-80" />
           <h2 className="text-3xl md:text-4xl font-bold text-[#1F3D2B]">
             Core Responsibilities
           </h2>

@@ -24,11 +24,12 @@ function InclusiveAccess() {
   ];
 
   return (
-    <section id="accessibility" className="bg-[#F5F6F4] py-24">
+    <section id="accessibility" className="bg-[#F5F6F4] py-6">
       <div className="mx-auto px-6">
-        <div className="rounded-[32px] bg-[#1F3D2B] px-8 py-14 md:px-12 md:py-16 shadow-xl shadow-[#1F3D2B]/15">
+        <div className="rounded-[32px] bg-[#1F3D2B] px-8 py-10 md:px-12 md:py-12 shadow-xl shadow-[#1F3D2B]/15">
           {/* Heading */}
           <div className="max-w-3xl mx-auto text-center">
+            <img src="/army logo.jpeg" alt="" className="h-12 w-12 mx-auto mb-4 bg-white rounded-full p-1 shadow-md" />
             <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-white">
               Built for Inclusive Access
             </h2>

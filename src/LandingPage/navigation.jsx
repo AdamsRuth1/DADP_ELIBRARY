@@ -10,12 +10,21 @@ function Navbar() {
     <header className="sticky top-0 z-50 bg-green-900 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center overflow-hidden">
-            <img
-              src={Logo}
-              alt="DADP logo"
-              className="h-8 w-8 object-contain"
-            />
+          <div className="flex items-center -space-x-2">
+            <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center overflow-hidden border-2 border-white shadow-sm z-10">
+              <img
+                src="/army logo.jpeg"
+                alt="Nigerian Army logo"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+              <img
+                src={Logo}
+                alt="DADP logo"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
           </div>
 
           <div>

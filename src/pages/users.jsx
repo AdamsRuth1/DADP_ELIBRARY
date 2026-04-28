@@ -93,17 +93,32 @@ function UsersPage() {
 
   async function fetchBooks() {
     const res = await fetch(`${API_BASE}/api/books`);
-    if (res.ok) setBooks(await res.json());
+    if (res.ok) {
+      const data = await res.json();
+      const fixUrl = (url) => {
+        if (!url) return url;
+        if (url.startsWith('http')) return url;
+        return `${API_BASE}${url}`;
+      };
+      const mapped = data.map(b => ({
+        ...b,
+        file: fixUrl(b.file),
+        thumbnail: fixUrl(b.thumbnail)
+      }));
+      setBooks(mapped);
+    }
   }
 
   async function handleBookFileChange(e, setterName) {
     const files = e.target.files;
+    if (!files || files.length === 0) return;
     if (setterName === 'book') setBookForm({...bookForm, files: Array.from(files)});
     else setEditBookForm({...editBookForm, file: files[0]});
   }
 
   async function handleThumbnailChange(e, setterName) {
     const file = e.target.files && e.target.files[0];
+    if (!file) return;
     if (setterName === 'book') setBookForm({...bookForm, thumbnail: file});
     else setEditBookForm({...editBookForm, thumbnail: file});
   }
@@ -211,21 +226,54 @@ function UsersPage() {
   }
 
   async function updateBook(id) {
-    const formData = new FormData();
-    if (editBookForm.title) formData.append('title', editBookForm.title);
-    if (editBookForm.author) formData.append('author', editBookForm.author);
-    if (editBookForm.category) formData.append('category', editBookForm.category || '');
-    if (editBookForm.file) formData.append('pdf', editBookForm.file);
-    if (editBookForm.thumbnail) formData.append('thumbnail', editBookForm.thumbnail);
+    setIsUploading(true);
+    try {
+      const payload = {
+        title: editBookForm.title,
+        author: editBookForm.author,
+        category: editBookForm.category || ''
+      };
 
-    const res = await fetch(`${API_BASE}/api/books/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: formData });
-    if (res.ok) {
-      setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
-      setBookModal({ open: false, mode: 'add', book: null });
-      fetchBooks();
-    } else {
-      const err = await res.json();
-      alert(err.error || 'Failed to update book');
+      // 1. Upload new PDF if selected
+      if (editBookForm.file) {
+        const pdfId = `${Date.now()}-${editBookForm.file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const { error: pdfError } = await supabase.storage.from('books').upload(pdfId, editBookForm.file);
+        if (pdfError) throw new Error(`PDF Upload Failed: ${pdfError.message}`);
+        payload.pdf_url = supabase.storage.from('books').getPublicUrl(pdfId).data.publicUrl;
+      }
+
+      // 2. Upload new Thumbnail if selected
+      if (editBookForm.thumbnail) {
+        const thumbId = `${Date.now()}-${editBookForm.thumbnail.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const { error: thumbError } = await supabase.storage.from('thumbnails').upload(thumbId, editBookForm.thumbnail);
+        if (thumbError) throw new Error(`Thumbnail Upload Failed: ${thumbError.message}`);
+        payload.thumbnail_url = supabase.storage.from('thumbnails').getPublicUrl(thumbId).data.publicUrl;
+      }
+
+      // 3. Send metadata URLs to backend
+      const res = await fetch(`${API_BASE}/api/books/${id}`, { 
+        method: 'PUT', 
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        }, 
+        body: JSON.stringify(payload) 
+      });
+
+      if (res.ok) {
+        setEditBookForm({ title: '', author: '', category: '', file: null, thumbnail: null });
+        setBookModal({ open: false, mode: 'add', book: null });
+        fetchBooks();
+        alert('Book updated successfully!');
+      } else {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to update book');
+      }
+    } catch (err) {
+      console.error('Update err:', err);
+      alert(err.message || "An error occurred while updating the book.");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -739,9 +787,10 @@ function UsersPage() {
                       ) : (
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                          disabled={isUploading}
                         >
-                          Save Changes
+                          {isUploading ? 'Saving...' : 'Save Changes'}
                         </button>
                       )}
                   </div>

@@ -46,12 +46,19 @@ function Library({ onOpenBook }) {
         const data = await res.json();
         if (cancelled) return;
 
-        // make file URLs absolute so they point to the backend static route
-        const mapped = (data || []).map((b) => ({
-          ...b,
-          file: b.file ? `${API_BASE}${b.file}` : b.file,
-          thumbnail: b.thumbnail ? `${API_BASE}${b.thumbnail}` : null
-        }));
+        // map URLs: relative paths get API_BASE prepended, absolute URLs (Supabase) are used as-is
+        const mapped = (data || []).map((b) => {
+          const fixUrl = (url) => {
+            if (!url) return url;
+            if (url.startsWith('http')) return url;
+            return `${API_BASE}${url}`;
+          };
+          return {
+            ...b,
+            file: fixUrl(b.file),
+            thumbnail: fixUrl(b.thumbnail)
+          };
+        });
         setBooks(mapped);
       } catch (err) {
         console.error('Failed to load books', err);
@@ -327,10 +334,11 @@ function Library({ onOpenBook }) {
             key={book.id}
             className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-96' : 'bg-white p-5'}`}
             style={book.thumbnail ? {
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url(${book.thumbnail})`,
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url("${book.thumbnail}")`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
+              backgroundColor: '#f3f4f6' // Fallback color
             } : undefined}
           >
             {/* Bulk Selection Checkbox */}

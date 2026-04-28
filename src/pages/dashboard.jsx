@@ -53,7 +53,16 @@ function Dashboard() {
       fetch(`${API_BASE}/api/books`)
         .then(res => res.json())
         .then(books => {
-          const favoriteBooks = books.filter(book => favoriteIds.includes(book.id));
+          const fixUrl = (url) => {
+            if (!url) return url;
+            if (url.startsWith('http')) return url;
+            return `${API_BASE}${url}`;
+          };
+          const mapped = books.map(b => ({
+            ...b,
+            thumbnail: fixUrl(b.thumbnail)
+          }));
+          const favoriteBooks = mapped.filter(book => favoriteIds.includes(book.id));
           setFavorites(favoriteBooks);
         })
         .catch(err => console.error('Failed to load favorites:', err));
@@ -250,10 +259,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 relative">
-      {/* Background Watermark */}
-      <div className="army-watermark"></div>
-      
+    <div className="flex min-h-screen bg-[#FDFDFD] text-slate-900 relative">
       <Sidebar
         activeItem={activeItem}
         onNavigate={setActiveItem}
@@ -367,7 +373,7 @@ function Dashboard() {
                         key={`${book.id}-${index}`}
                         className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
                         style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${book.thumbnail})`,
+                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("${book.thumbnail}")`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
@@ -414,7 +420,7 @@ function Dashboard() {
                         key={`${book.id}-${index}`}
                         className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
                         style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${book.thumbnail})`,
+                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("${book.thumbnail}")`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
