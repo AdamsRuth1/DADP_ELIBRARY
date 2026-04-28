@@ -57,6 +57,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.get('/api/version', (req, res) => res.json({ version: '1.1', status: 'fixed' }));
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'db.json');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
