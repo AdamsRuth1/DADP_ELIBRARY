@@ -25,6 +25,11 @@ export const SidebarData = [
         link: "/profile",
     },
     {
+        title: "Academics",
+        icon: <MenuBookIcon />,
+        link: "/instructor-materials",
+    },
+    {
         title: "Users",
         icon: <HomeIcon />,
         link: "/users",

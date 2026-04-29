@@ -6,6 +6,7 @@ import UsersPage from "./users";
 import Profile from "./profile";
 import Bookmarks from "./bookmarks";
 import AiLibrarianWidget from "../Components/AiLibrarianWidget";
+import InstructorMaterials from "./instructorMaterials";
 import { API_BASE } from "../config/apiBase";
 
 function parseJwt(token) {
@@ -299,6 +300,10 @@ function Dashboard() {
 
         {activeItem === "Bookmarks" && (
           <Bookmarks onOpenBook={setSelectedBook} />
+        )}
+
+        {activeItem === "Academics" && (
+          <InstructorMaterials />
         )}
 
         {activeItem === "Dashboard" && (

@@ -625,6 +625,7 @@ function UsersPage() {
                       disabled={userModal.mode === 'edit' && role !== 'SuperAdmin'}
                     >
                       <option value="User">User</option>
+                      <option value="Instructor">Instructor</option>
                       <option value="Admin">Admin</option>
                       {role === 'SuperAdmin' && <option value="SuperAdmin">SuperAdmin</option>}
                     </select>

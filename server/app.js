@@ -174,6 +174,20 @@ sqlitedb.serialize(() => {
   sqlitedb.run(`CREATE INDEX IF NOT EXISTS idx_ratings_book ON ratings(bookId)`);
 });
 
+// instructor_materials table
+sqlitedb.serialize(() => {
+  sqlitedb.run(`CREATE TABLE IF NOT EXISTS instructor_materials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    instructor_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL, -- 'Material', 'Syllabus', 'Topic'
+    content TEXT, -- JSON or text content
+    fileUrl TEXT, -- URL for uploaded files
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE CASCADE
+  )`);
+});
+
 function logActivity(actorId, action, targetType, targetId, details) {
   try {
     sqlitedb.run(`INSERT INTO activities (actorId, action, targetType, targetId, details) VALUES (?, ?, ?, ?, ?)`, [actorId || null, action, targetType || null, targetId || null, details || null]);
@@ -642,6 +656,100 @@ app.get('/api/books/:id/views', maybeAuthenticate, maybeRequireRole('SuperAdmin'
   sqlitedb.all(sql, [id], (err, rows) => {
     if (err) return res.status(500).json({ error: 'DB error' });
     res.json(rows || []);
+  });
+});
+
+// --- Instructor Materials API ---
+app.get('/api/instructor/materials', authenticateJWT, (req, res) => {
+  const { role, sub } = req.user;
+  let sql = `SELECT m.*, u.name as instructorName FROM instructor_materials m JOIN users u ON m.instructor_id = u.id`;
+  let params = [];
+
+  if (role !== 'Admin' && role !== 'SuperAdmin' && role !== 'Instructor') {
+    // Regular users can see all materials? Or maybe only those approved?
+    // The request doesn't specify approval, so we'll show all materials.
+  } else if (role === 'Instructor') {
+    // Instructors see only their own? Or all?
+    // Usually instructors manage their own.
+  }
+
+  sql += ` ORDER BY m.createdAt DESC`;
+
+  sqlitedb.all(sql, params, (err, rows) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(rows || []);
+  });
+});
+
+app.post('/api/instructor/materials', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), (req, res) => {
+  const { title, type, content, fileUrl } = req.body || {};
+  if (!title || !type) return res.status(400).json({ error: 'Missing title or type' });
+
+  const instructor_id = req.user.sub;
+
+  sqlitedb.run(
+    `INSERT INTO instructor_materials (instructor_id, title, type, content, fileUrl) VALUES (?, ?, ?, ?, ?)`,
+    [instructor_id, title, type, content || '', fileUrl || ''],
+    function(err) {
+      if (err) return res.status(500).json({ error: 'DB error' });
+      const newId = this.lastID;
+      logActivity(instructor_id, 'create_material', 'material', newId, JSON.stringify({ title, type }));
+      res.status(201).json({ id: newId, instructor_id, title, type, content, fileUrl });
+    }
+  );
+});
+
+app.put('/api/instructor/materials/:id', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), (req, res) => {
+  const id = Number(req.params.id);
+  const { title, type, content, fileUrl } = req.body || {};
+  const instructor_id = req.user.sub;
+  const role = req.user.role;
+
+  // Check ownership unless admin
+  sqlitedb.get(`SELECT instructor_id FROM instructor_materials WHERE id = ?`, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    if (!row) return res.status(404).json({ error: 'Material not found' });
+
+    if (role !== 'Admin' && role !== 'SuperAdmin' && row.instructor_id !== instructor_id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const updates = [];
+    const params = [];
+    if (title) { updates.push('title = ?'); params.push(title); }
+    if (type) { updates.push('type = ?'); params.push(type); }
+    if (content !== undefined) { updates.push('content = ?'); params.push(content); }
+    if (fileUrl !== undefined) { updates.push('fileUrl = ?'); params.push(fileUrl); }
+
+    if (updates.length === 0) return res.status(400).json({ error: 'Nothing to update' });
+
+    params.push(id);
+    sqlitedb.run(`UPDATE instructor_materials SET ${updates.join(', ')} WHERE id = ?`, params, function(err2) {
+      if (err2) return res.status(500).json({ error: 'DB error' });
+      logActivity(instructor_id, 'update_material', 'material', id, JSON.stringify({ title, type }));
+      res.json({ ok: true });
+    });
+  });
+});
+
+app.delete('/api/instructor/materials/:id', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), (req, res) => {
+  const id = Number(req.params.id);
+  const instructor_id = req.user.sub;
+  const role = req.user.role;
+
+  sqlitedb.get(`SELECT instructor_id FROM instructor_materials WHERE id = ?`, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    if (!row) return res.status(404).json({ error: 'Material not found' });
+
+    if (role !== 'Admin' && role !== 'SuperAdmin' && row.instructor_id !== instructor_id) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    sqlitedb.run(`DELETE FROM instructor_materials WHERE id = ?`, [id], function(err2) {
+      if (err2) return res.status(500).json({ error: 'DB error' });
+      logActivity(instructor_id, 'delete_material', 'material', id, null);
+      res.json({ ok: true });
+    });
   });
 });
 
