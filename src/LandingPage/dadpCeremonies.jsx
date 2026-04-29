@@ -32,9 +32,9 @@ export default function DadpCeremonies() {
             >
               <img src={imgSrc} alt={`Ceremony ${idx + 1}`} className="w-full h-full object-cover opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end">
-                <div className="p-8 md:p-12 w-full text-center">
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Celebrating Excellence</h3>
-                  <p className="text-gray-200">Recognizing the dedication and mastery of our graduating professionals</p>
+                <div className="p-4 md:p-12 w-full text-center">
+                  <h3 className="text-lg md:text-3xl font-bold text-white mb-1 md:mb-2">Celebrating Excellence</h3>
+                  <p className="text-gray-200 text-xs md:text-base">Recognizing the dedication and mastery of our graduating professionals</p>
                 </div>
               </div>
             </div>

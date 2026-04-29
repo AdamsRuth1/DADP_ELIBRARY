@@ -328,19 +328,19 @@ function Library({ onOpenBook }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
         {paginatedBooks.map((book) => (
-          <div
-            key={book.id}
-            className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-96' : 'bg-white p-5'}`}
-            style={book.thumbnail ? {
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)), url("${book.thumbnail}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: '#f3f4f6' // Fallback color
-            } : undefined}
-          >
+            <div
+              key={book.id}
+              className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-60 md:h-96' : 'bg-white p-3 md:p-5'}`}
+              style={book.thumbnail ? {
+                backgroundImage: `url("${book.thumbnail}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundColor: '#f3f4f6'
+              } : undefined}
+            >
             {/* Bulk Selection Checkbox */}
             {bulkMode && (
               <div className="absolute top-3 left-3 z-10">
@@ -385,27 +385,27 @@ function Library({ onOpenBook }) {
             </button>
 
             <div className="absolute inset-0 bg-black/20" />
-            <div className="relative flex h-full flex-col justify-end p-5">
-              <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-4 shadow-lg">
-                <h2 className="text-lg font-semibold text-gray-900" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h2>
-                <p className="text-sm text-white font-bold mt-2">{book.author}</p>
+            <div className="relative flex h-full flex-col justify-end p-2 md:p-5">
+              <div className="bg-white/40 backdrop-blur-md rounded-2xl p-2 md:p-4 shadow-lg border border-white/20">
+                <h2 className="text-sm md:text-lg font-bold text-gray-900 leading-tight line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h2>
+                <p className="text-[10px] md:text-sm text-white font-bold mt-1 md:mt-2 opacity-90">{book.author}</p>
 
-                {/* Rating Summary */}
-                <div className="mt-2">
+                {/* Rating Summary - smaller on mobile */}
+                <div className="mt-1 md:mt-2 scale-75 md:scale-100 origin-left">
                   <RatingSummary bookId={book.id} />
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-3">
+                <div className="mt-2 md:mt-4 flex gap-1.5 md:gap-3">
                   <button
                     onClick={async () => {
                       try {
                         const token = localStorage.getItem('token');
-                        await fetch(`${BACKEND_BASE}/api/books/${book.id}/view`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                        await fetch(`${API_BASE}/api/books/${book.id}/view`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
                       } catch (e) { /* ignore */ }
                       addToRecentlyViewed(book);
                       onOpenBook(book);
                     }}
-                    className="px-4 py-2 rounded-lg bg-[#1F3D2B] text-white focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+                    className="flex-1 px-2 md:px-4 py-1 md:py-2 rounded-lg bg-[#1F3D2B] text-white text-[10px] md:text-base font-bold focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
                     aria-label={`Read ${book.title}`}
                   >
                     Read
@@ -415,7 +415,7 @@ function Library({ onOpenBook }) {
                     href={book.file}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+                    className="flex-1 px-2 md:px-4 py-1 md:py-2 text-center rounded-lg border border-gray-300 bg-white/50 text-[10px] md:text-sm font-bold text-gray-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
                     aria-label={`Open ${book.title} in a new tab`}
                   >
                     Open

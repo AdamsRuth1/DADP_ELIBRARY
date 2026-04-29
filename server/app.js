@@ -56,7 +56,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.get('/api/version', (req, res) => res.json({ version: '1.1', status: 'fixed' }));
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'db.json');
@@ -220,7 +221,7 @@ function saveDB(db) {
 
 // Simple API: list books
 app.get('/api/books', async (req, res) => {
-  const { data, error } = await supabase.from('books').select('*');
+  const { data, error } = await supabase.from('books').select('*').order('id', { ascending: false });
   if (error) {
     console.error('Supabase fetch error:', error);
     return res.status(500).json({ error: 'Failed to fetch books from Supabase' });

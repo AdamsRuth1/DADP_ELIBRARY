@@ -25,6 +25,7 @@ function UsersPage() {
   const [bookForm, setBookForm] = useState({ title: '', author: '', category: '', files: [], thumbnail: null });
   const [uploadQueue, setUploadQueue] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, status: '' });
 
   const [editingUserId, setEditingUserId] = useState(null);
   const [editUserForm, setEditUserForm] = useState({ name: '', password: '', role: 'User' });
@@ -147,12 +148,14 @@ function UsersPage() {
   async function dispatchQueue() {
     if (uploadQueue.length === 0) return alert('No books in queue');
     setIsUploading(true);
+    setUploadProgress({ current: 0, total: uploadQueue.length, status: 'Starting batch upload...' });
 
     try {
         for (let i = 0; i < uploadQueue.length; i++) {
             const item = uploadQueue[i];
-            
             const titleToUse = item.title || item.file.name.replace(/\.[^/.]+$/, "");
+            
+            setUploadProgress(prev => ({ ...prev, current: i + 1, status: `Uploading "${titleToUse}"...` }));
                 
             // 1. Upload PDF to Supabase
             const pdfId = `${Date.now()}-${item.file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
@@ -165,6 +168,7 @@ function UsersPage() {
             // 2. Upload Thumbnail to Supabase Storage
             let thumbnailUrl = null;
             if (item.thumbnail) {
+               setUploadProgress(prev => ({ ...prev, status: `Uploading thumbnail for "${titleToUse}"...` }));
                const thumbId = `${Date.now()}-${item.thumbnail.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
                const { error: thumbError } = await supabase.storage.from('thumbnails').upload(thumbId, item.thumbnail);
                  
@@ -173,6 +177,7 @@ function UsersPage() {
             }
 
             // 3. Send metadata URLs to backend database
+            setUploadProgress(prev => ({ ...prev, status: `Saving metadata for "${titleToUse}"...` }));
             const payload = {
                 title: titleToUse,
                 author: item.author,
@@ -181,7 +186,6 @@ function UsersPage() {
                 thumbnail_url: thumbnailUrl
             };
 
-            console.log('Hitting API:', `${API_BASE}/api/books`);
             const res = await fetch(`${API_BASE}/api/books`, { 
                 method: 'POST', 
                 headers: { 
@@ -213,6 +217,7 @@ function UsersPage() {
         alert(err.message || "An error occurred during bulk upload.");
     } finally {
         setIsUploading(false);
+        setUploadProgress({ current: 0, total: 0, status: '' });
     }
   }
 
@@ -776,14 +781,31 @@ function UsersPage() {
                           </button>
                           
                           {uploadQueue.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={dispatchQueue}
-                                disabled={isUploading}
-                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-bold"
-                              >
-                                {isUploading ? 'Deploying...' : `Launch Batch (${uploadQueue.length})`}
-                              </button>
+                            <div className="flex flex-col gap-2">
+                                {isUploading && uploadProgress.total > 0 && (
+                                  <div className="mb-2">
+                                    <div className="flex justify-between text-[10px] text-blue-600 mb-1">
+                                      <span>Batch Progress: {uploadProgress.current}/{uploadProgress.total}</span>
+                                      <span>{Math.round((uploadProgress.current / uploadProgress.total) * 100)}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-1">
+                                      <div 
+                                        className="bg-blue-600 h-1 rounded-full transition-all duration-300" 
+                                        style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                                      />
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 mt-1 italic animate-pulse">{uploadProgress.status}</p>
+                                  </div>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={dispatchQueue}
+                                  disabled={isUploading}
+                                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-bold shadow-md disabled:opacity-50"
+                                >
+                                  {isUploading ? 'Deploying Batch...' : `Launch Batch (${uploadQueue.length})`}
+                                </button>
+                            </div>
                           )}
                         </>
                       ) : (

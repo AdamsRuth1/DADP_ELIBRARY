@@ -180,9 +180,9 @@ function InstructorMaterials() {
           <p className="text-gray-500 mt-1">Get started by creating your first {activeTab.toLowerCase()}.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {filteredMaterials.map((item) => (
-            <div key={item.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col h-full">
+            <div key={item.id} className="bg-white rounded-2xl p-3 md:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
                 <div className={`p-2 rounded-lg ${
                   item.type === 'Material' ? 'bg-blue-50 text-blue-600' :

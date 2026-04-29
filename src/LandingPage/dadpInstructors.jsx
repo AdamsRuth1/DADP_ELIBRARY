@@ -47,10 +47,10 @@ export default function DadpInstructors() {
           {instructors.map((inst, idx) => (
             <div key={idx} className={`absolute inset-0 transition-all duration-1000 ease-in-out ${currentInstructor === idx ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
               <img src={inst.img} alt={inst.name} className="w-full h-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-8">
-                <h4 className="text-2xl font-bold text-white">{inst.name}</h4>
-                <p className="text-[#C5A64D] font-bold text-sm uppercase tracking-wider mb-2">{inst.role}</p>
-                <p className="text-gray-300 italic">"{inst.desc}"</p>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 md:p-8">
+                <h4 className="text-lg md:text-2xl font-bold text-white">{inst.name}</h4>
+                <p className="text-[#C5A64D] font-bold text-[10px] md:text-sm uppercase tracking-wider mb-1 md:mb-2">{inst.role}</p>
+                <p className="text-gray-300 italic text-xs md:text-base line-clamp-2 md:line-clamp-none">"{inst.desc}"</p>
               </div>
             </div>
           ))}

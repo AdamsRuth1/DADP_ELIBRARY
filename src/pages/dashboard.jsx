@@ -376,9 +376,9 @@ function Dashboard() {
                     {[...recentlyViewed, ...recentlyViewed].map((book, index) => (
                       <div
                         key={`${book.id}-${index}`}
-                        className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+                        className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
                         style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("${book.thumbnail}")`,
+                          backgroundImage: `url("${book.thumbnail}")`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
@@ -386,12 +386,11 @@ function Dashboard() {
                         onClick={() => handleOpenBook(book)}
                       >
                         <div className="absolute inset-0 bg-black/10" />
-                        <div className="relative h-full flex flex-col justify-end p-4">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3">
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>
-                            <p className="text-xs text-gray-600 mb-1">{book.author}</p>
-                            <p className="text-xs text-gray-500">{book.category}</p>
-                            <p className="text-xs text-gray-400 mt-2">
+                        <div className="relative h-full flex flex-col justify-end p-2 md:p-4">
+                          <div className="bg-white/40 backdrop-blur-md rounded-xl p-2 md:p-3 border border-white/20">
+                            <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-0.5 line-clamp-1 md:line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h3>
+                            <p className="text-[10px] md:text-xs text-gray-700 font-bold opacity-90">{book.author}</p>
+                            <p className="hidden md:block text-[10px] text-gray-500 mt-1">
                               Viewed {new Date(book.viewedAt).toLocaleDateString()}
                             </p>
                           </div>
@@ -423,9 +422,9 @@ function Dashboard() {
                     {[...favorites, ...favorites].map((book, index) => (
                       <div
                         key={`${book.id}-${index}`}
-                        className="flex-shrink-0 w-64 h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+                        className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
                         style={book.thumbnail ? {
-                          backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("${book.thumbnail}")`,
+                          backgroundImage: `url("${book.thumbnail}")`,
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
@@ -448,11 +447,10 @@ function Dashboard() {
                           </svg>
                         </div>
                         <div className="absolute inset-0 bg-black/10" />
-                        <div className="relative h-full flex flex-col justify-end p-4">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3">
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">{book.title}</h3>
-                            <p className="text-xs text-gray-600 mb-1">{book.author}</p>
-                            <p className="text-xs text-gray-500">{book.category}</p>
+                        <div className="relative h-full flex flex-col justify-end p-2 md:p-4">
+                          <div className="bg-white/40 backdrop-blur-md rounded-xl p-2 md:p-3 border border-white/20">
+                            <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-0.5 line-clamp-1 md:line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h3>
+                            <p className="text-[10px] md:text-xs text-gray-700 font-bold opacity-90">{book.author}</p>
                           </div>
                         </div>
                       </div>

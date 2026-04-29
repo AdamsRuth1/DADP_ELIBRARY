@@ -48,12 +48,14 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
         aria-label="Main sidebar navigation"
       >
       {/* Header */}
-      <div className="px-6 py-5 border-b border-[#2c4d39] flex" >
-        <img
-          src={Logo}
-          alt=""
-          className="inset-0 m-auto w-[50px] opacity-1 pointer"
-        />
+      <div className="px-6 py-5 border-b border-[#2c4d39] flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1 shadow-inner">
+          <img
+            src={Logo}
+            alt="DADP logo"
+            className="h-10 w-10 object-contain cursor-pointer"
+          />
+        </div>
         <div>
           <h1 className="text-xl font-bold tracking-wide">DADP eLibrary</h1>
           <p className="mt-1 text-xs text-green-100/70">
