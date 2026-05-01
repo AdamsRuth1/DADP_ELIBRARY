@@ -24,6 +24,7 @@ function Dashboard() {
   const [selectedBook, setSelectedBook] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [recentlyAdded, setRecentlyAdded] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [readingStats, setReadingStats] = useState({
     totalTime: 0,
@@ -40,6 +41,7 @@ function Dashboard() {
 
   // Refs for auto-scrolling
   const recentlyViewedRef = useRef(null);
+  const recentlyAddedRef = useRef(null);
   const favoritesRef = useRef(null);
 
   useEffect(() => {
@@ -47,27 +49,32 @@ function Dashboard() {
     const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
     setRecentlyViewed(viewed);
 
-    // Load favorite books from localStorage
+    // Load favorite books IDs from localStorage
     const favoriteIds = JSON.parse(localStorage.getItem('bookFavorites') || '[]');
-    if (favoriteIds.length > 0) {
-      // Fetch book details for favorites
-      fetch(`${API_BASE}/api/books`)
-        .then(res => res.json())
-        .then(books => {
-          const fixUrl = (url) => {
-            if (!url) return url;
-            if (url.startsWith('http')) return url;
-            return `${API_BASE}${url}`;
-          };
-          const mapped = books.map(b => ({
-            ...b,
-            thumbnail: fixUrl(b.thumbnail)
-          }));
-          const favoriteBooks = mapped.filter(book => favoriteIds.includes(book.id));
-          setFavorites(favoriteBooks);
-        })
-        .catch(err => console.error('Failed to load favorites:', err));
-    }
+
+    // Fetch all books for Recently Added and Favorites
+    fetch(`${API_BASE}/api/books`)
+      .then(res => res.json())
+      .then(books => {
+        const fixUrl = (url) => {
+          if (!url) return url;
+          if (url.startsWith('http')) return url;
+          return `${API_BASE}${url}`;
+        };
+        const mapped = books.map(b => ({
+          ...b,
+          thumbnail: fixUrl(b.thumbnail),
+          file: fixUrl(b.file)
+        }));
+        
+        // Recently Added (API already returns sorted by ID DESC)
+        setRecentlyAdded(mapped.slice(0, 12));
+
+        // Filter Favorites
+        const favoriteBooks = mapped.filter(book => favoriteIds.includes(book.id));
+        setFavorites(favoriteBooks);
+      })
+      .catch(err => console.error('Failed to load books:', err));
 
     // Load and calculate reading statistics
     loadReadingStats();
@@ -125,44 +132,61 @@ function Dashboard() {
     };
   }, [recentlyViewed]);
 
-  // Auto-scroll for Favorite Books
+  // Auto-scroll for Recently Added Books
   useEffect(() => {
-    if (!favoritesRef.current || favorites.length === 0) return;
-
-    const container = favoritesRef.current;
+    if (!recentlyAddedRef.current || recentlyAdded.length === 0) return;
+    const container = recentlyAddedRef.current;
     let scrollInterval;
     let isPaused = false;
-
     const startAutoScroll = () => {
       scrollInterval = setInterval(() => {
         if (isPaused) return;
-
         const scrollLeft = container.scrollLeft;
         const scrollWidth = container.scrollWidth;
         const clientWidth = container.clientWidth;
-
-        // If we've scrolled to the end of the duplicated content, reset to beginning
         if (scrollLeft >= scrollWidth / 2 - clientWidth) {
           container.scrollLeft = 0;
         } else {
-          container.scrollLeft += 1; // Slow, smooth scroll
+          container.scrollLeft += 1;
         }
-      }, 50); // Adjust speed here (lower = faster)
+      }, 50);
     };
-
-    const handleMouseEnter = () => {
-      isPaused = true;
-    };
-
-    const handleMouseLeave = () => {
-      isPaused = false;
-    };
-
+    const handleMouseEnter = () => { isPaused = true; };
+    const handleMouseLeave = () => { isPaused = false; };
     container.addEventListener('mouseenter', handleMouseEnter);
     container.addEventListener('mouseleave', handleMouseLeave);
-
     startAutoScroll();
+    return () => {
+      clearInterval(scrollInterval);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [recentlyAdded]);
 
+  // Auto-scroll for Favorite Books
+  useEffect(() => {
+    if (!favoritesRef.current || favorites.length === 0) return;
+    const container = favoritesRef.current;
+    let scrollInterval;
+    let isPaused = false;
+    const startAutoScroll = () => {
+      scrollInterval = setInterval(() => {
+        if (isPaused) return;
+        const scrollLeft = container.scrollLeft;
+        const scrollWidth = container.scrollWidth;
+        const clientWidth = container.clientWidth;
+        if (scrollLeft >= scrollWidth / 2 - clientWidth) {
+          container.scrollLeft = 0;
+        } else {
+          container.scrollLeft += 1;
+        }
+      }, 60); // Slightly slower
+    };
+    const handleMouseEnter = () => { isPaused = true; };
+    const handleMouseLeave = () => { isPaused = false; };
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+    startAutoScroll();
     return () => {
       clearInterval(scrollInterval);
       container.removeEventListener('mouseenter', handleMouseEnter);
@@ -285,7 +309,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:p-6 md:pt-6">
+      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:p-6 md:pt-6 pb-24 md:pb-6">
         {activeItem === "Library" && (
           <Library onOpenBook={setSelectedBook} />
         )}
@@ -356,26 +380,62 @@ function Dashboard() {
               </div>
             </div>
 
+            {/* Recently Added Books */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Recently Added Books</h2>
+              {recentlyAdded.length === 0 ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1F3D2B]"></div>
+                </div>
+              ) : (
+                <div className="relative overflow-hidden">
+                  <div
+                    ref={recentlyAddedRef}
+                    className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {[...recentlyAdded, ...recentlyAdded].map((book, index) => (
+                      <div
+                        key={`added-${book.id}-${index}`}
+                        className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+                        style={book.thumbnail ? {
+                          backgroundImage: `url("${book.thumbnail}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        } : undefined}
+                        onClick={() => handleOpenBook(book)}
+                      >
+                        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors" />
+                        <div className="relative h-full flex flex-col justify-end p-2 md:p-4">
+                          <div className="bg-white/40 backdrop-blur-md rounded-xl p-2 md:p-3 border border-white/20">
+                            <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-0.5 line-clamp-1 md:line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h3>
+                            <p className="text-[10px] md:text-xs text-gray-700 font-bold opacity-90">{book.author}</p>
+                            <span className="mt-1 inline-block text-[8px] md:text-[10px] px-1.5 py-0.5 bg-green-100 text-green-800 rounded font-bold uppercase tracking-wider">New</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Recently Viewed Books */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4">Recently Viewed Books</h2>
               {recentlyViewed.length === 0 ? (
-                <p className="text-gray-500">No recently viewed books yet. Start reading to see them here!</p>
+                <p className="text-gray-500 text-sm italic">No recently viewed books yet. Start reading to see them here!</p>
               ) : (
                 <div className="relative overflow-hidden">
                   <div
                     ref={recentlyViewedRef}
                     className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-                    style={{
-                      scrollBehavior: 'smooth',
-                      scrollbarWidth: 'none',
-                      msOverflowStyle: 'none'
-                    }}
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
-                    {/* Duplicate items for infinite scroll effect */}
                     {[...recentlyViewed, ...recentlyViewed].map((book, index) => (
                       <div
-                        key={`${book.id}-${index}`}
+                        key={`viewed-${book.id}-${index}`}
                         className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
                         style={book.thumbnail ? {
                           backgroundImage: `url("${book.thumbnail}")`,

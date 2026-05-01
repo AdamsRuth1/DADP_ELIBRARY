@@ -170,61 +170,68 @@ function Reader({ selectedBook, onBack }) {
 
   return (
     <div className={`flex flex-col min-h-screen ${nightMode ? 'bg-gray-900 text-white' : 'bg-slate-50 text-slate-900'}`}>
-      <header className={`px-6 py-4 flex items-center justify-between ${nightMode ? 'bg-gray-800' : 'bg-[#1F3D2B] text-white'}`}>
-        <button
-          onClick={onBack}
-          className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
-          aria-label="Back to library"
-        >
-          Back
-        </button>
+      <header className={`px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 ${nightMode ? 'bg-gray-800' : 'bg-[#1F3D2B] text-white'} sticky top-0 z-20 shadow-md`}>
+        <div className="flex items-center justify-between w-full md:w-auto gap-4">
+          <button
+            onClick={onBack}
+            className={`rounded-lg px-3 md:px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10 hover:bg-white/20'}`}
+          >
+            ← Back
+          </button>
+          
+          <div className="flex flex-col items-center md:items-start overflow-hidden">
+            <h1 className="text-sm md:text-lg font-bold truncate max-w-[150px] md:max-w-md">{selectedBook.title}</h1>
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-[10px] md:text-sm text-green-100 opacity-80">
+                {readingProgress}%
+              </span>
+              <span className="text-[10px] md:text-sm text-green-100 opacity-80">
+                {formatTime(readingTime)}
+              </span>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`p-2 rounded-lg ${nightMode ? 'bg-gray-700' : 'bg-white/10'}`}
+            >
+              ⚙️
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center md:justify-end gap-2 md:gap-4 w-full md:w-auto">
           <button
             onClick={() => setShowBookmarkModal(true)}
-            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
-            aria-label="Bookmark this moment"
+            className={`flex-1 md:flex-none rounded-lg px-2 md:px-4 py-2 text-[10px] md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10 hover:bg-white/20'}`}
           >
-            🔖 Bookmark
+            🔖 <span className="hidden xs:inline">Bookmark</span>
           </button>
 
           <button
             onClick={() => setShowRatingModal(true)}
-            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
-            aria-label="Rate this book"
+            className={`flex-1 md:flex-none rounded-lg px-2 md:px-4 py-2 text-[10px] md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10 hover:bg-white/20'}`}
           >
-            ⭐ Rate & Review
+            ⭐ <span className="hidden xs:inline">Rate</span>
           </button>
 
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className={`rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10'}`}
-            aria-label="Reading settings"
+            className={`hidden md:block rounded-lg px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white/10 hover:bg-white/20'}`}
           >
             ⚙️ Settings
           </button>
 
-          <div className="flex flex-col items-center">
-            <h1 className="text-lg font-semibold">{selectedBook.title}</h1>
-            <div className="flex items-center gap-4 mt-1">
-              <span className="text-sm text-green-100">
-                Progress: {readingProgress}%
-              </span>
-              <span className="text-sm text-green-100">
-                Time: {formatTime(readingTime)}
-              </span>
-            </div>
-          </div>
+          <a
+            href={selectedBook.file}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex-1 md:flex-none text-center rounded-lg px-2 md:px-4 py-2 text-[10px] md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white text-[#1F3D2B]'}`}
+          >
+            Open PDF
+          </a>
         </div>
-
-        <a
-          href={selectedBook.file}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`rounded-lg px-4 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-[#C5A64D] ${nightMode ? 'bg-gray-700 text-white' : 'bg-white text-[#1F3D2B]'}`}
-        >
-          Open PDF
-        </a>
       </header>
 
       {/* Settings Panel */}
@@ -309,12 +316,18 @@ function Reader({ selectedBook, onBack }) {
           </div>
         </div>
 
-        <iframe
-          src={selectedBook.file}
-          title={selectedBook.title}
-          className={`w-full h-[70vh] rounded-xl border border-gray-300 bg-white ${nightMode ? 'filter invert brightness-90' : ''}`}
-          onLoad={() => setIsReading(true)}
-        />
+        <div className="w-full bg-white rounded-xl shadow-inner overflow-hidden border border-gray-200 relative">
+          <iframe
+            src={selectedBook.file}
+            title={selectedBook.title}
+            className={`w-full h-[75vh] md:h-[85vh] ${nightMode ? 'filter invert brightness-90' : ''}`}
+            style={{ border: 'none' }}
+            onLoad={() => setIsReading(true)}
+          />
+        </div>
+        <p className="mt-4 text-center md:hidden text-xs text-gray-500 italic">
+          Tip: If you can't scroll through all pages, use the <b>"Open PDF"</b> button at the top.
+        </p>
       </main>
 
       {/* Rating Modal */}

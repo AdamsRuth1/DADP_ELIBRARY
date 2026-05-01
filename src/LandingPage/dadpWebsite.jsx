@@ -6,6 +6,7 @@ import DadpAbout from "./dadpAbout";
 import DadpCommand from "./dadpCommand";
 import DadpCourses from "./dadpCourses";
 import DadpInstructors from "./dadpInstructors";
+import DadpEvents from "./dadpEvents";
 import DadpPartnerships from "./dadpPartnerships";
 import DadpActivities from "./dadpActivities";
 import DadpCeremonies from "./dadpCeremonies";
@@ -24,6 +25,7 @@ export default function DadpWebsite() {
          <DadpCommand /> 
         <DadpCourses />
         <DadpInstructors />
+        <DadpEvents />
         <DadpPartnerships />
         <DadpActivities />
         <DadpCeremonies />

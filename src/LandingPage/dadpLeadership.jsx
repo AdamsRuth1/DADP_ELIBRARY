@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import CommanderImage from "../assets/NACWC COMD.jpeg";
 import DirectorImage from "../assets/Director.png";
+import IctImage from "../assets/IMG_0936.jpeg";
 
 export default function DadpLeadership() {
   const [commanderVision, setCommanderVision] = useState(
@@ -9,7 +10,7 @@ export default function DadpLeadership() {
 
 
   return (
-    <section className="bg-[#F5F6F4] py-16 border-b border-gray-200">
+    <section className="bg-[#F5F6F4] py-6 md:py-16 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-12">
           <p className="text-sm uppercase tracking-[0.3em] text-[#C5A64D]">Leadership & Vision</p>
@@ -67,6 +68,17 @@ export default function DadpLeadership() {
                     <div className="font-bold">Director</div>
                     <div>Department Of Automated Data Processing (DADP)</div>
                   </div>
+                </div>
+              </div>
+
+              <label className="block font-bold text-gray-700 mt-6 mb-2 uppercase tracking-wider">Directorate Overview</label>
+              <div className="bg-[#1F3D2B]/5 rounded-3xl p-6 border border-[#1F3D2B]/10">
+                <p className="text-gray-700 leading-relaxed italic text-sm md:text-base">
+                  "Established in 1983, the Directorate of Automated Data Processing (DADP) was forged to primarily advise the Chief of Army Staff (COAS) on all critical matters concerning ICT, data automation, and Management Information Systems within the Nigerian Army."
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-[#1F3D2B] font-bold text-xs uppercase tracking-widest">
+                  <span className="w-8 h-0.5 bg-[#C5A64D]"></span>
+                  Strategic Data Core
                 </div>
               </div>
             </div>

@@ -1,8 +1,6 @@
 import React from "react";
-
-const PREVIEW_IMG = "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-const CLASSROOM_2 = "https://images.unsplash.com/photo-1531482615713-2def6ce27a93?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
-
+import Comd2 from "../assets/PHOTO-2026-04-27-15-09-25.jpg"
+import Comd1 from "../assets/PHOTO-2026-04-27-15-09-21.jpg"
 export default function DadpCommand() {
   return (
     <section className="bg-white/95 backdrop-blur-md py-20 border-t border-gray-200" id="command">
@@ -17,7 +15,7 @@ export default function DadpCommand() {
 
         <div className="grid md:grid-cols-2 gap-12 mb-16">
           <div className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
-            <img src={PREVIEW_IMG} alt="Commander Cyber Warfare" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
+            <img src={Comd1} alt="Commander Cyber Warfare" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
             <div>
               <h3 className="text-2xl font-bold text-[#1F3D2B]">Brigadier General [Name Placeholder]</h3>
               <p className="text-[#C5A64D] font-bold mb-4">Commander, Cyber Warfare Command</p>
@@ -28,7 +26,7 @@ export default function DadpCommand() {
           </div>
 
           <div className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
-            <img src={CLASSROOM_2} alt="Director DADP" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
+            <img src={Comd2} alt="Director DADP" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
             <div>
               <h3 className="text-2xl font-bold text-[#1F3D2B]">Colonel [Name Placeholder]</h3>
               <p className="text-[#C5A64D] font-bold mb-4">Director of DADP</p>

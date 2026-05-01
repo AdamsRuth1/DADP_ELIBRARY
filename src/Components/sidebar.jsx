@@ -22,8 +22,8 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
   const displayName = user?.name || user?.serviceID || 'User';
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+    localStorage.clear(); // Clear all data (token, recent views, etc.)
+    window.location.href = '/'; // Hard redirect to landing page
   };
 
   return (
@@ -38,7 +38,7 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
 
       <aside
         className={[
-          "fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg",
+          "fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg overflow-y-auto",
           "transform transition-transform duration-200",
           // Desktop: always visible
           "md:translate-x-0",
