@@ -9,6 +9,8 @@ import LandingPageEnding from "../LandingPage/landingPageEnding";
 import { API_BASE } from "../config/apiBase";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Book3D from "../Components/Book3D";
+import { useScrollAnimations } from "../hooks/useScrollAnimations";
 
 function RecentlyAddedBooks() {
   const [books, setBooks] = useState([]);
@@ -42,7 +44,7 @@ function RecentlyAddedBooks() {
   if (books.length === 0) return null;
 
   return (
-    <section className="bg-white py-8">
+    <section className="bg-white py-8 animate-section">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -114,8 +116,12 @@ function RecentlyAddedBooks() {
 }
 
 function LandingPage() {
+  const containerRef = useRef();
+
+  useScrollAnimations(containerRef);
+
   return (
-    <div className="relative bg-[#F5F6F4]">
+    <div className="relative bg-[#F5F6F4]" ref={containerRef}>
       {/* Background Army Watermark Layer */}
       <div className="army-watermark"></div>
 
@@ -124,7 +130,7 @@ function LandingPage() {
         <NavBar />
 
         <div className="">
-          <section className="max-w-7xl mx-auto px-6 py-4">
+          <section className="max-w-7xl mx-auto px-6 py-4 animate-section">
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-[#1F3D2B] leading-tight">
@@ -140,35 +146,30 @@ function LandingPage() {
                 <div className="mt-8 flex gap-4">
                   <a
                     href="/login"
-                    className="bg-[#1F3D2B] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#162c1f] transition-all"
+                    className="bg-[#1F3D2B] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#162c1f] transition-all inline-block text-center"
                   >
                     Access Library
                   </a>
 
                   <a
                     href="#features"
-                    className="border border-gray-300 px-6 py-3 rounded-xl font-semibold text-[#1F3D2B] hover:bg-white hover:shadow transition-all"
+                    className="border border-gray-300 px-6 py-3 rounded-xl font-semibold text-[#1F3D2B] hover:bg-white hover:shadow transition-all inline-block text-center"
                   >
                     Learn More
                   </a>
                 </div>
               </div>
 
-              <div className="relative flex justify-center">
+              <div className="relative flex justify-center w-full max-w-md mx-auto">
                 <div className="absolute w-80 h-80 bg-[#1F3D2B] rounded-3xl opacity-10 blur-2xl"></div>
-
-                <img
-                  src={Logo}
-                  alt="preview"
-                  className="relative z-10 w-full max-w-md rounded-2xl drop-shadow"
-                />
+                <Book3D logoSrc={Logo} />
               </div>
             </div>
           </section>
 
           <RecentlyAddedBooks />
 
-          <section className="max-w-7xl mx-auto px-6">
+          <section className="max-w-7xl mx-auto px-6 animate-section">
             <Coreresponsibility />
             <HowItWorks/>
             <InclusiveAccess/>
