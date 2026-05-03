@@ -9,7 +9,7 @@ export default function DadpCommand() {
           <h2 className="text-3xl md:text-5xl font-extrabold text-[#1F3D2B] mb-4">Command & Leadership</h2>
           <div className="w-24 h-1.5 bg-[#C5A64D] mx-auto rounded-full"></div>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">
-            The strategic visionaries guiding the Department of Automated Data Processing towards cyber excellence.
+            The strategic visionaries guiding the Directorate of Automated Data Processing towards cyber excellence.
           </p>
         </div>
 

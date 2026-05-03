@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, Plus, Edit, Trash2, ShieldAlert, BookOpen, AlertCircle, FileText, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../config/supabaseClient';
 import { API_BASE } from "../config/apiBase";
+import CategoryDropdown from '../Components/CategoryDropdown';
 
 function parseJwt(token) {
   try {
@@ -22,7 +23,8 @@ function UsersPage() {
   const role = jwt ? jwt.role : null;
 
   const [books, setBooks] = useState([]);
-  const [bookForm, setBookForm] = useState({ title: '', author: '', category: '', files: [], thumbnail: null });
+  const [categories, setCategories] = useState([]);
+  const [bookForm, setBookForm] = useState({ title: '', author: '', category_id: '', files: [], thumbnail: null });
   const [uploadQueue, setUploadQueue] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, status: '' });
@@ -31,7 +33,7 @@ function UsersPage() {
   const [editUserForm, setEditUserForm] = useState({ name: '', password: '', role: 'User' });
 
   const [editingBookId, setEditingBookId] = useState(null);
-  const [editBookForm, setEditBookForm] = useState({ title: '', author: '', category: '', file: null, thumbnail: null });
+  const [editBookForm, setEditBookForm] = useState({ title: '', author: '', category_id: '', file: null, thumbnail: null });
 
   const [viewHistory, setViewHistory] = useState({ open: false, bookId: null, rows: [] });
   const [bookModal, setBookModal] = useState({ open: false, mode: 'add', book: null }); // 'add' or 'edit'
@@ -132,13 +134,13 @@ function UsersPage() {
     setUploadQueue([...uploadQueue, {
       title: bookForm.title,
       author: bookForm.author || 'Unknown',
-      category: bookForm.category || '',
+      category_id: bookForm.category_id || null,
       file: bookForm.files[0],
       thumbnail: bookForm.thumbnail
     }]);
 
     // Clear form to allow entry of the next book immediately
-    setBookForm({ title: '', author: '', category: '', files: [], thumbnail: null });
+    setBookForm({ title: '', author: '', category_id: '', files: [], thumbnail: null });
   }
 
   function removeQueuedBook(index) {
@@ -181,7 +183,7 @@ function UsersPage() {
             const payload = {
                 title: titleToUse,
                 author: item.author,
-                category: item.category,
+                category_id: item.category_id,
                 pdf_url: pdfUrl,
                 thumbnail_url: thumbnailUrl
             };
@@ -223,12 +225,14 @@ function UsersPage() {
 
   async function editBook(b) {
     setBookModal({ open: true, mode: 'edit', book: b });
-    setEditBookForm({ title: b.title || '', author: b.author || '', category: b.category || '', file: null, thumbnail: null });
+    // Find category_id from categories array based on category name
+    const cat = categories.find(c => c.name === b.category);
+    setEditBookForm({ title: b.title || '', author: b.author || '', category_id: cat?.id || '', file: null, thumbnail: null });
   }
 
   function openAddBookModal() {
     setBookModal({ open: true, mode: 'add', book: null });
-    setBookForm({ title: '', author: '', category: '', files: [], thumbnail: null });
+    setBookForm({ title: '', author: '', category_id: '', files: [], thumbnail: null });
   }
 
   async function updateBook(id) {
@@ -237,7 +241,7 @@ function UsersPage() {
       const payload = {
         title: editBookForm.title,
         author: editBookForm.author,
-        category: editBookForm.category || ''
+        category_id: editBookForm.category_id || null
       };
 
       // 1. Upload new PDF if selected
@@ -705,18 +709,16 @@ function UsersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">Category</label>
-                    <input
-                      type="text"
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={bookModal.mode === 'add' ? bookForm.category : editBookForm.category}
-                      onChange={(e) => {
+                    <CategoryDropdown
+                      value={bookModal.mode === 'add' ? bookForm.category_id : editBookForm.category_id}
+                      onChange={(catId) => {
                         if (bookModal.mode === 'add') {
-                          setBookForm({...bookForm, category: e.target.value});
+                          setBookForm({...bookForm, category_id: catId});
                         } else {
-                          setEditBookForm({...editBookForm, category: e.target.value});
+                          setEditBookForm({...editBookForm, category_id: catId});
                         }
                       }}
+                      required
                     />
                   </div>
 

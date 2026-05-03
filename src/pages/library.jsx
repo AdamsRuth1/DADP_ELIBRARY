@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import { API_BASE } from "../config/apiBase";
 
@@ -35,6 +35,62 @@ function Library({ onOpenBook }) {
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState(new Set());
   const [userRole, setUserRole] = useState(null);
+  const [googleBooks, setGoogleBooks] = useState([]);
+  const [isSearchingGoogle, setIsSearchingGoogle] = useState(false);
+  const [hasSearchedGoogle, setHasSearchedGoogle] = useState(false);
+  const searchTimeoutRef = useRef(null);
+
+  const searchGoogleBooks = () => {
+    if (!searchTerm || isSearchingGoogle) return;
+
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce: wait 500ms before making the API call
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearchingGoogle(true);
+      setHasSearchedGoogle(true);
+      try {
+        const url = `${API_BASE}/api/google-books?q=${encodeURIComponent(searchTerm)}&maxResults=12`;
+        console.log('Searching Google Books via proxy:', url);
+        const res = await fetch(url);
+        console.log('Google Books proxy response status:', res.status);
+
+        if (res.status === 429) {
+          throw new Error('429');
+        }
+
+        if (!res.ok) throw new Error(`Failed to fetch from Google Books: ${res.status}`);
+
+        const data = await res.json();
+        console.log('Google Books data:', data);
+
+        const formattedBooks = (data.items || []).map(item => ({
+          id: item.id,
+          title: item.volumeInfo.title || 'Unknown Title',
+          author: item.volumeInfo.authors ? item.volumeInfo.authors.join(', ') : 'Unknown Author',
+          category: item.volumeInfo.categories ? item.volumeInfo.categories[0] : 'Uncategorized',
+          thumbnail: item.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
+          file: item.volumeInfo.infoLink || item.volumeInfo.previewLink,
+          isGoogleBook: true
+        }));
+        console.log('Formatted Google Books:', formattedBooks.length);
+        setGoogleBooks(formattedBooks);
+      } catch (err) {
+        console.error('Google Books search failed', err);
+        setGoogleBooks([]);
+        if (err.message.includes('429')) {
+          alert('Google Books API rate limit reached. Please wait a minute and try again.');
+        } else {
+          alert('Google Books search failed: ' + err.message);
+        }
+      } finally {
+        setIsSearchingGoogle(false);
+      }
+    }, 500);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +145,15 @@ function Library({ onOpenBook }) {
     };
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Toggle favorite status
   const toggleFavorite = (bookId) => {
     const newFavorites = new Set(favorites);
@@ -127,7 +192,7 @@ function Library({ onOpenBook }) {
     if (!token) return;
 
     try {
-      const res = await fetch(`${BACKEND_BASE}/api/books/bulk-favorite`, {
+      const res = await fetch(`${API_BASE}/api/books/bulk-favorite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +233,7 @@ function Library({ onOpenBook }) {
     if (!token) return;
 
     try {
-      const res = await fetch(`${BACKEND_BASE}/api/books/bulk-delete`, {
+      const res = await fetch(`${API_BASE}/api/books/bulk-delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,6 +276,8 @@ function Library({ onOpenBook }) {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
+    setGoogleBooks([]);
+    setHasSearchedGoogle(false);
   }, [searchTerm, selectedCategory, showFavoritesOnly]);
 
   // Get unique categories for filter dropdown
@@ -328,6 +395,25 @@ function Library({ onOpenBook }) {
         />
       </div>
 
+      {paginatedBooks.length === 0 && searchTerm && !hasSearchedGoogle && (
+        <div className="mb-8 text-center bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm">
+          <p className="text-gray-600 mb-4 text-lg">No books found in the local library for "{searchTerm}".</p>
+          <button
+            onClick={searchGoogleBooks}
+            disabled={isSearchingGoogle}
+            className="px-6 py-3 bg-[#1F3D2B] text-white rounded-lg font-bold hover:bg-[#1F3D2B]/90 focus:outline-none focus:ring-2 focus:ring-[#C5A64D] transition-colors shadow-md"
+          >
+            {isSearchingGoogle ? 'Searching Google Books...' : 'Search Google Books'}
+          </button>
+        </div>
+      )}
+
+      {hasSearchedGoogle && googleBooks.length === 0 && !isSearchingGoogle && (
+         <div className="mb-8 text-center bg-gray-50 rounded-2xl p-8 border border-gray-200 shadow-sm">
+           <p className="text-gray-600 text-lg">No results found on Google Books either.</p>
+         </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
         {paginatedBooks.map((book) => (
             <div
@@ -426,6 +512,52 @@ function Library({ onOpenBook }) {
           </div>
         ))}
       </div>
+
+      {/* Google Books Results */}
+      {googleBooks.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6 text-[#1F3D2B] border-b pb-2 flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-[#C5A64D] rounded-full inline-block"></span>
+            Results from Google Books
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+            {googleBooks.map((book) => (
+              <div
+                key={book.id}
+                className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-60 md:h-96' : 'bg-white p-3 md:p-5'}`}
+                style={book.thumbnail ? {
+                  backgroundImage: `url("${book.thumbnail}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundColor: '#f3f4f6'
+                } : undefined}
+              >
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="relative flex h-full flex-col justify-end p-2 md:p-5">
+                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-2 md:p-4 shadow-lg border border-white/20">
+                    <h2 className="text-sm md:text-lg font-bold text-gray-900 leading-tight line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h2>
+                    <p className="text-[10px] md:text-sm text-white font-bold mt-1 md:mt-2 opacity-90">{book.author}</p>
+                    <p className="text-[10px] text-gray-800 font-semibold bg-white/60 px-2 py-0.5 rounded-full inline-block mt-1 w-max">{book.category}</p>
+
+                    <div className="mt-2 md:mt-4 flex gap-1.5 md:gap-3">
+                      <a
+                        href={book.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 px-2 md:px-4 py-1 md:py-2 text-center rounded-lg bg-[#1F3D2B] text-white text-[10px] md:text-sm font-bold hover:bg-[#1F3D2B]/90 focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
+                        aria-label={`Open ${book.title} in Google Books`}
+                      >
+                        Preview in Google Books
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

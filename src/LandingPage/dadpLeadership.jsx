@@ -52,7 +52,11 @@ export default function DadpLeadership() {
 
           <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
             <div className="p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
-              <div className="flex-1 w-full order-2 md:order-1">
+              <div className="w-64 h-64 md:w-[22rem] md:h-[28rem] shrink-0 rounded-3xl overflow-hidden shadow-lg order-1 md:order-2">
+                <img src={DirectorImage} alt="Director DADP" className="w-full h-full object-cover object-top" />
+              </div>
+
+              <div className="flex-1 w-full order-2 md:order-2">
                 <h2 className="text-xl md:text-3xl font-bold text-[#1F3D2B] leading-tight tracking-tight">
                   BRIG GEN VE CLETUS
                 </h2>
@@ -76,9 +80,7 @@ export default function DadpLeadership() {
                 </div>
               </div>
 
-              <div className="w-48 h-48 md:w-64 md:h-72 shrink-0 rounded-3xl overflow-hidden border-4 border-[#1F3D2B] shadow-lg order-1 md:order-2">
-                <img src={DirectorImage} alt="Director DADP" className="w-full h-full object-cover object-top" />
-              </div>
+
             </div>
           </div>
         </div>

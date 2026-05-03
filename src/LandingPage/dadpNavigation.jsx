@@ -11,7 +11,7 @@ export default function DadpNavigation() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white">DADP Headquarters</h1>
-            <p className="text-xs text-white">Department of Automated Data Processing</p>
+            <p className="text-xs text-white">Directorate of Automated Data Processing</p>
           </div>
         </div>
 
