@@ -317,11 +317,17 @@ app.post('/api/login', async (req, res) => {
   try {
     const { data: row, error } = await supabase
       .from('users')
-      .select('id, serviceID, name, "passwordHash", role')
+      .select('id, serviceID, name, "passwordHash", role, status')
       .eq('serviceID', serviceID)
       .single();
 
     if (error || !row) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+
+    // Check status if column exists (fallback to Active if undefined)
+    const userStatus = row.status || 'Active';
+    if (userStatus !== 'Active') {
+      return res.status(403).json({ ok: false, error: 'Your account is inactive. Please contact the administrator or the school.' });
+    }
 
     bcrypt.compare(password, row.passwordHash, (err, match) => {
       if (err || !match) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
@@ -549,33 +555,34 @@ app.get('/api/users', authenticateJWT, requireRole('Admin','SuperAdmin'), async 
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, serviceID, name, role')
+      .select('id, serviceID, name, role, status')
       .order('id', { ascending: true });
     if (error) return res.status(500).json({ error: 'DB error' });
-    res.json(data);
+    res.json(data.map(u => ({ ...u, status: u.status || 'Active' })));
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }
 });
 
 app.post('/api/users', authenticateJWT, requireRole('Admin','SuperAdmin'), async (req, res) => {
-  const { serviceID, name, password, role } = req.body || {};
+  const { serviceID, name, password, role, status } = req.body || {};
   if (!serviceID || !password) return res.status(400).json({ error: 'Missing required fields' });
 
   const creatorRole = req.user && req.user.role;
   const assignedRole = (creatorRole === 'Admin') ? 'User' : (role || 'User');
+  const assignedStatus = status || 'Active';
 
   try {
     const hash = bcrypt.hashSync(password, 10);
     const { data, error } = await supabase
       .from('users')
-      .insert([{ serviceID, name: name || '', passwordHash: hash, role: assignedRole }])
+      .insert([{ serviceID, name: name || '', passwordHash: hash, role: assignedRole, status: assignedStatus }])
       .select();
 
     if (error) return res.status(500).json({ error: 'DB error', details: error.message });
     const newUser = data[0];
-    await logActivity(req.user && req.user.sub, 'create_user', 'user', newUser.id, JSON.stringify({ serviceID, role: assignedRole }));
-    res.status(201).json({ id: newUser.id, serviceID: newUser.serviceID, name: newUser.name, role: newUser.role });
+    await logActivity(req.user && req.user.sub, 'create_user', 'user', newUser.id, JSON.stringify({ serviceID, role: assignedRole, status: assignedStatus }));
+    res.status(201).json({ id: newUser.id, serviceID: newUser.serviceID, name: newUser.name, role: newUser.role, status: newUser.status || 'Active' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to hash password' });
   }
@@ -583,12 +590,12 @@ app.post('/api/users', authenticateJWT, requireRole('Admin','SuperAdmin'), async
 
 app.put('/api/users/:id', authenticateJWT, requireRole('Admin','SuperAdmin'), async (req, res) => {
   const id = Number(req.params.id);
-  const { name, password, role } = req.body || {};
+  const { name, password, role, status } = req.body || {};
 
   try {
     const { data: row, error: fetchError } = await supabase
       .from('users')
-      .select('id, serviceID, role')
+      .select('id, serviceID, role, status')
       .eq('id', id)
       .single();
 
@@ -600,13 +607,24 @@ app.put('/api/users/:id', authenticateJWT, requireRole('Admin','SuperAdmin'), as
     if (name !== undefined) updateData.name = name;
     if (password !== undefined) updateData.passwordHash = bcrypt.hashSync(password, 10);
     if (role !== undefined && requesterRole === 'SuperAdmin') updateData.role = role;
+    if (status !== undefined) updateData.status = status;
 
     if (Object.keys(updateData).length === 0) return res.status(400).json({ error: 'Nothing to update' });
 
     const { error } = await supabase.from('users').update(updateData).eq('id', id);
-    if (error) return res.status(500).json({ error: 'DB error', details: error.message });
+    if (error) {
+      // Fallback if status column is missing
+      if (error.message && error.message.includes('status')) {
+        delete updateData.status;
+        if (Object.keys(updateData).length > 0) {
+          await supabase.from('users').update(updateData).eq('id', id);
+        }
+      } else {
+        return res.status(500).json({ error: 'DB error', details: error.message });
+      }
+    }
 
-    await logActivity(req.user && req.user.sub, 'update_user', 'user', id, JSON.stringify({ name, role: updateData.role || row.role }));
+    await logActivity(req.user && req.user.sub, 'update_user', 'user', id, JSON.stringify({ name, role: updateData.role || row.role, status: updateData.status || row.status }));
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'DB error' });

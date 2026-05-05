@@ -52,7 +52,7 @@ function Dashboard() {
     // Load favorite books IDs from localStorage
     const favoriteIds = JSON.parse(localStorage.getItem('bookFavorites') || '[]');
 
-    // Fetch all books for Recently Added and Favorites
+    // Fetch all books for Recently Added (admin only) and Favorites
     fetch(`${API_BASE}/api/books`)
       .then(res => res.json())
       .then(books => {
@@ -66,11 +66,16 @@ function Dashboard() {
           thumbnail: fixUrl(b.thumbnail),
           file: fixUrl(b.file)
         }));
-        
-        // Recently Added (API already returns sorted by ID DESC)
-        setRecentlyAdded(mapped.slice(0, 12));
 
-        // Filter Favorites
+        // Only populate Recently Added for Admin / SuperAdmin
+        const currentToken = localStorage.getItem('token');
+        const currentJwt = currentToken ? parseJwt(currentToken) : null;
+        const currentRole = currentJwt ? currentJwt.role : null;
+        if (currentRole === 'Admin' || currentRole === 'SuperAdmin') {
+          setRecentlyAdded(mapped.slice(0, 12));
+        }
+
+        // Filter Favorites (available to all users)
         const favoriteBooks = mapped.filter(book => favoriteIds.includes(book.id));
         setFavorites(favoriteBooks);
       })
@@ -380,46 +385,57 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Recently Added Books */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Recently Added Books</h2>
-              {recentlyAdded.length === 0 ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1F3D2B]"></div>
+            {/* Recently Added Books — visible to Admin and SuperAdmin only */}
+            {(role === 'Admin' || role === 'SuperAdmin') && (
+              <div className="mb-8">
+                {/* Admin-only badge header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-xl font-semibold">Recently Added Books</h2>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    Admin Only
+                  </span>
                 </div>
-              ) : (
-                <div className="relative overflow-hidden">
-                  <div
-                    ref={recentlyAddedRef}
-                    className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                  >
-                    {[...recentlyAdded, ...recentlyAdded].map((book, index) => (
-                      <div
-                        key={`added-${book.id}-${index}`}
-                        className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                        style={book.thumbnail ? {
-                          backgroundImage: `url("${book.thumbnail}")`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                        } : undefined}
-                        onClick={() => handleOpenBook(book)}
-                      >
-                        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors" />
-                        <div className="relative h-full flex flex-col justify-end p-2 md:p-4">
-                          <div className="bg-white/40 backdrop-blur-md rounded-xl p-2 md:p-3 border border-white/20">
-                            <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-0.5 line-clamp-1 md:line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h3>
-                            <p className="text-[10px] md:text-xs text-gray-700 font-bold opacity-90">{book.author}</p>
-                            <span className="mt-1 inline-block text-[8px] md:text-[10px] px-1.5 py-0.5 bg-green-100 text-green-800 rounded font-bold uppercase tracking-wider">New</span>
+                {recentlyAdded.length === 0 ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1F3D2B]"></div>
+                  </div>
+                ) : (
+                  <div className="relative overflow-hidden">
+                    <div
+                      ref={recentlyAddedRef}
+                      className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                      {[...recentlyAdded, ...recentlyAdded].map((book, index) => (
+                        <div
+                          key={`added-${book.id}-${index}`}
+                          className="flex-shrink-0 w-48 md:w-64 h-36 md:h-48 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+                          style={book.thumbnail ? {
+                            backgroundImage: `url("${book.thumbnail}")`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                          } : undefined}
+                          onClick={() => handleOpenBook(book)}
+                        >
+                          <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors" />
+                          <div className="relative h-full flex flex-col justify-end p-2 md:p-4">
+                            <div className="bg-white/40 backdrop-blur-md rounded-xl p-2 md:p-3 border border-white/20">
+                              <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-0.5 line-clamp-1 md:line-clamp-2" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.8)' }}>{book.title}</h3>
+                              <p className="text-[10px] md:text-xs text-gray-700 font-bold opacity-90">{book.author}</p>
+                              <span className="mt-1 inline-block text-[8px] md:text-[10px] px-1.5 py-0.5 bg-green-100 text-green-800 rounded font-bold uppercase tracking-wider">New</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Recently Viewed Books */}
             <div className="mb-8">
