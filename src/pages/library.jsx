@@ -414,11 +414,12 @@ function Library({ onOpenBook }) {
          </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
-        {paginatedBooks.map((book) => (
+      <div className="max-w-1/2 mx-auto">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
+          {paginatedBooks.map((book) => (
             <div
               key={book.id}
-              className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-60 md:h-96' : 'bg-white p-3 md:p-5'}`}
+              className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-42 md:h-64' : 'bg-white p-3 md:p-5'}`}
               style={book.thumbnail ? {
                 backgroundImage: `url("${book.thumbnail}")`,
                 backgroundSize: 'cover',
@@ -511,6 +512,7 @@ function Library({ onOpenBook }) {
             </div>
           </div>
         ))}
+        </div>
       </div>
 
       {/* Google Books Results */}
@@ -520,11 +522,12 @@ function Library({ onOpenBook }) {
             <span className="w-1.5 h-6 bg-[#C5A64D] rounded-full inline-block"></span>
             Results from Google Books
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+          <div className="max-w-1/2 mx-auto">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
             {googleBooks.map((book) => (
               <div
                 key={book.id}
-                className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-60 md:h-96' : 'bg-white p-3 md:p-5'}`}
+                className={`relative rounded-2xl overflow-hidden shadow-sm border border-gray-200 ${book.thumbnail ? 'h-42 md:h-64' : 'bg-white p-3 md:p-5'}`}
                 style={book.thumbnail ? {
                   backgroundImage: `url("${book.thumbnail}")`,
                   backgroundSize: 'cover',
@@ -555,6 +558,7 @@ function Library({ onOpenBook }) {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       )}

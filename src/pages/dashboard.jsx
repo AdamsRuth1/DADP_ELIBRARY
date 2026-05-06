@@ -337,7 +337,9 @@ function Dashboard() {
 
         {activeItem === "Dashboard" && (
           <div className="min-h-screen md:ml-64">
-            <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+            </div>
             <p className="mt-2 text-gray-600 mb-8">
               Welcome to the DADP eLibrary dashboard.
             </p>
