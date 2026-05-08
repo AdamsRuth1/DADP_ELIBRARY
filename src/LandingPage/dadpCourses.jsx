@@ -1,40 +1,11 @@
 import React, { useState } from "react";
 
-const quarters = [
-  {
-    q: "1st Quarter", time: "January — April", color: "border-blue-500",
-    courses: ["System Administration and Maintenance", "Database Security and Information Assurance"],
-    syllabus: [
-      { title: "System Administration & Maintenance", topics: ["SAM 101 Hardware and sofware configuration and Maintenance", "SAM 102 Managing Users and Window Registry", "SAM 104 Computer Security", "SAM 104 Data Recovery/Hard disk Management", "SAM 105 Windows Server", "SAM 106 Introduction to Basic Unmanned Aerial Vehicle", "SAM 107 Advanced Excel", "SAM 108 Map Reading ", "SAM 109 Improvised Explosive Device", "SAM 110 Introduction to Artificial intelligence", "SAM 111 NA Ethic Custom and Tradition", "SAM 112 NA Doctrine"] },
-      { title: "Database Security & Info Assurance", topics: ["DSIA 101 Network Design Techniques", "DSIA 102 Ethical Hacking", "DSIA 103 DataBase Security", "DSIA 104 Digital Forensic", "DSIA 105 Closed Circuit Television Installation and Configuration", "DSIA 106 Introduction to Basic Unmanned Aerial Vehicle", "DSIA 107 Advance Excel", "DSIA 108 Map Reading ", "DSIA 109 Improvised Explosive Device", "DSIA 110 Introduction to Artificial intelligence", "DSIA 111 NA Ethic Custom and Tradition", "DSIA 112 NA Doctrine"] }
-    ]
-  },
-  {
-    q: "2nd Quarter", time: "April — July", color: "border-green-500",
-    courses: ["Database Management System", "Information Management System"],
-    syllabus: [
-      { title: "Database Management System", topics: ["Relational Database Architecture", "Advanced SQL & Query Optimization", "Data Redundancy & Backups", "Performance Tuning"] },
-      { title: "Information Management System", topics: ["Data Collection & Processing Protocols", "Enterprise Information Architecture", "Disaster Recovery Operations", "Strategic Data Analysis"] }
-    ]
-  },
-  {
-    q: "3rd Quarter", time: "July — September", color: "border-yellow-500",
-    courses: ["Microsoft Office Proficiency for NA Clerks"],
-    syllabus: [
-      { title: "Microsoft Office Proficiency", topics: ["Advanced Excel Data Processing & Macros", "Professional Documentation & Formats", "PowerPoint Briefing Construction", "Digital Workflow Automation"] }
-    ]
-  },
-  {
-    q: "4th Quarter", time: "September — December", color: "border-purple-500",
-    courses: ["Database Management using Oracle and Access", "Satellite Internet Automated Data Processing"],
-    syllabus: [
-      { title: "Oracle & Access Database Management", topics: ["PL/SQL Engineering", "Access Database Scaling", "Oracle Cloud Infrastructure", "Secure Network Migrations"] },
-      { title: "Satellite Internet ADP", topics: ["Satellite Uplink Configurations", "Automated Target Data Processing", "Remote Network Deployments", "Field Communications Systems"] }
-    ]
-  },
-];
-
-export default function DadpCourses() {
+export default function DadpCourses({ config }) {
+  const courses = config || {
+    heading: "Academic Training Quarters",
+    subheading: "Our rigorous courses are divided into highly focused strategic quarters designed to systematically upgrade personnel capabilities.",
+    quarters: []
+  };
   const [activeSyllabus, setActiveSyllabus] = useState(null);
 
   return (
@@ -42,15 +13,15 @@ export default function DadpCourses() {
       <section className="bg-[#F5F6F4]/90 backdrop-blur-md py-20" id="courses">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-[#1F3D2B] mb-4">Academic Training Quarters</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#1F3D2B] mb-4">{courses.heading}</h2>
             <div className="w-24 h-1.5 bg-[#C5A64D] mx-auto rounded-full"></div>
             <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">
-              Our rigorous courses are divided into highly focused strategic quarters designed to systematically upgrade personnel capabilities.
+              {courses.subheading}
             </p>
           </div>
 
           <div className="grid lg:grid-cols-4 gap-6">
-            {quarters.map((quarter, idx) => (
+            {courses.quarters.map((quarter, idx) => (
               <div key={idx} className={`bg-white rounded-2xl shadow-lg border-t-8 ${quarter.color} p-6 flex flex-col h-full transform hover:-translate-y-2 transition-transform duration-300`}>
                 <div className="mb-6 border-b border-gray-100 pb-4">
                   <h3 className="text-2xl font-black text-gray-900">{quarter.q}</h3>

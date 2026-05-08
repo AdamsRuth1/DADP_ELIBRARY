@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import CommanderImage from "../assets/comd.png";
 import DirectorImage from "../assets/Director.png";
 import IctImage from "../assets/IMG_0936.jpeg";
 
-export default function DadpLeadership() {
-  const [commanderVision, setCommanderVision] = useState(
-    " To Defend The Nigeria Army's Cyberspace, Attack And Neutalize Hostile Digital Threats, And Exploit Cyber Capabilities To Safeguard National Interests, Support Land Operations, And Accomplish Tasks In Aid Of Civil Autority"
-  );
-
+export default function DadpLeadership({ config }) {
+  const leadership = config || {
+    sectionLabel: "Leadership & Vision",
+    header: "Commander and Director Spotlight",
+    commander: {
+      name: "MAJ GEN KO OSEMWEGIE",
+      rank: "DSS psc(+)fdc(+)FCM MNIM PhD",
+      role: "Commander, Nigeria Army CyberWarfare Command (NACWC)",
+      vision: "To defend the Nigeria Army's cyberspace, attack and neutralize hostile digital threats, and exploit cyber capabilities to safeguard national interests, support land operations, and accomplish tasks in aid of civil authority."
+    },
+    director: {
+      name: "BRIG GEN VE CLETUS",
+      rank: "DSS FCM psc fdc MNIM MSC",
+      role: "Director, Directorate Of Automated Data Processing (DADP)",
+      overview: "Established in 1983, the Directorate of Automated Data Processing (DADP) was forged to primarily advise the Chief of Army Staff (COAS) on all critical matters concerning ICT, data automation, and Management Information Systems within the Nigerian Army."
+    }
+  };
 
   return (
     <section className="bg-[#F5F6F4] py-6 md:py-16 border-b border-gray-200">
@@ -25,23 +37,21 @@ export default function DadpLeadership() {
             <div className="p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
               <div className="flex-1 w-full order-2 md:order-1">
                 <h2 className="text-xl md:text-3xl font-bold text-[#1F3D2B] leading-tight tracking-tight">
-                  MAJ GEN KO OSEMWEGIE
+                  {leadership.commander.name}
                 </h2>
                 <p className="text-sm md:text-base font-normal text-gray-600 mt-1">
-                  DSS psc(+)fdc(+)FCM MNIM PhD
+                  {leadership.commander.rank}
                 </p>
                 <div className="mt-4 text-sm uppercase tracking-[0.3em] text-[#1F3D2B] font-semibold">
                   <div className="font-bold">Commander</div>
-                  <div>Nigeria Army CyberWarfare Command (NACWC)</div>
+                  <div>{leadership.commander.role}</div>
                 </div>
 
-                <label className="block font-bold text-gray-700 mt-8 mb-2"> VISION</label>
-                <textarea
-                  value={commanderVision}
-                  onChange={(event) => setCommanderVision(event.target.value)}
-                  rows={5}
-                  className="w-full italic rounded-3xl border border-gray-200 p-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C5A64D]"
-                />
+                <div className="mt-8 rounded-3xl border border-gray-200 bg-slate-50 p-4 text-gray-700">
+                  <p className="italic leading-relaxed text-sm md:text-base">
+                    {leadership.commander.vision}
+                  </p>
+                </div>
               </div>
 
               <div className="w-64 h-64 md:w-[22rem] md:h-[28rem] shrink-0 rounded-3xl overflow-hidden shadow-lg order-1 md:order-2">
@@ -58,24 +68,25 @@ export default function DadpLeadership() {
 
               <div className="flex-1 w-full order-2 md:order-2">
                 <h2 className="text-xl md:text-3xl font-bold text-[#1F3D2B] leading-tight tracking-tight">
-                  BRIG GEN VE CLETUS
+                  {leadership.director.name}
                 </h2>
                 <p className="text-sm md:text-base font-normal text-gray-600 mt-1">
-                  DSS FCM psc fdc MNIM MSC
+                  {leadership.director.rank}
                 </p>
                 <div className="mt-4 text-sm uppercase tracking-[0.3em] text-[#1F3D2B] font-semibold">
                   <div className="font-bold">Director</div>
-                  <div>Directorate Of Automated Data Processing (DADP)</div>
+                  <div>{leadership.director.role}</div>
                 </div>
 
-                <label className="block font-bold text-gray-700 mt-8 mb-2 uppercase tracking-wider">Directorate Overview</label>
-                <div className="bg-[#1F3D2B]/5 rounded-3xl p-6 border border-[#1F3D2B]/10">
-                  <p className="text-gray-700 leading-relaxed italic text-sm md:text-base">
-                    "Established in 1983, the Directorate of Automated Data Processing (DADP) was forged to primarily advise the Chief of Army Staff (COAS) on all critical matters concerning ICT, data automation, and Management Information Systems within the Nigerian Army."
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-[#1F3D2B] font-bold text-xs uppercase tracking-widest">
-                    <span className="w-8 h-0.5 bg-[#C5A64D]"></span>
-                    Strategic Data Core
+                <div className="mt-8">
+                  <div className="bg-[#1F3D2B]/5 rounded-3xl p-6 border border-[#1F3D2B]/10">
+                    <p className="text-gray-700 leading-relaxed italic text-sm md:text-base">
+                      {leadership.director.overview}
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-[#1F3D2B] font-bold text-xs uppercase tracking-widest">
+                      <span className="w-8 h-0.5 bg-[#C5A64D]"></span>
+                      Strategic Data Core
+                    </div>
                   </div>
                 </div>
               </div>

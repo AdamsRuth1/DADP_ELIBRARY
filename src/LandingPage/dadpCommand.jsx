@@ -1,40 +1,38 @@
 import React from "react";
 import Comd2 from "../assets/PHOTO-2026-04-27-15-09-25.jpg"
 import Comd1 from "../assets/PHOTO-2026-04-27-15-09-21.jpg"
-export default function DadpCommand() {
+export default function DadpCommand({ config }) {
+  const command = config || {
+    heading: "Command & Leadership",
+    description: "The strategic visionaries guiding the Directorate of Automated Data Processing towards cyber excellence.",
+    cards: [],
+    staffIntro: "DADP Key Operational Staff",
+    staffRoles: []
+  };
   return (
     <section className="bg-white/95 backdrop-blur-md py-20 border-t border-gray-200" id="command">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold text-[#1F3D2B] mb-4">Command & Leadership</h2>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-[#1F3D2B] mb-4">{command.heading}</h2>
           <div className="w-24 h-1.5 bg-[#C5A64D] mx-auto rounded-full"></div>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">
-            The strategic visionaries guiding the Directorate of Automated Data Processing towards cyber excellence.
+            {command.description}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 mb-16">
-          <div className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
-            <img src={Comd1} alt="Commander Cyber Warfare" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
-            <div>
-              <h3 className="text-2xl font-bold text-[#1F3D2B]">Brigadier General [Name Placeholder]</h3>
-              <p className="text-[#C5A64D] font-bold mb-4">Commander, Cyber Warfare Command</p>
-              <p className="text-gray-600 leading-relaxed italic border-l-4 border-[#C5A64D] pl-4">
-                "Our mission is to establish an impenetrable digital frontier. We equip our forces with the supreme technological superiority required to predict, defend, and eliminate systemic threats across the African cyberspace."
-              </p>
+          {command.cards.map((card, idx) => (
+            <div key={idx} className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
+              <img src={idx === 0 ? Comd1 : Comd2} alt={card.title} className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
+              <div>
+                <h3 className="text-2xl font-bold text-[#1F3D2B]">{card.title}</h3>
+                <p className="text-[#C5A64D] font-bold mb-4">{card.subtitle}</p>
+                <p className="text-gray-600 leading-relaxed italic border-l-4 border-[#C5A64D] pl-4">
+                  {card.quote}
+                </p>
+              </div>
             </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
-            <img src={Comd2} alt="Director DADP" className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
-            <div>
-              <h3 className="text-2xl font-bold text-[#1F3D2B]">Colonel [Name Placeholder]</h3>
-              <p className="text-[#C5A64D] font-bold mb-4">Director of DADP</p>
-              <p className="text-gray-600 leading-relaxed italic border-l-4 border-[#C5A64D] pl-4">
-                "My mission for DADP is the relentless pursuit of educational excellence. We are transforming standard clerks into elite system administrators capable of manipulating massive datasets on the modern battlefield."
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="bg-[#1F3D2B] text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden">
@@ -43,15 +41,10 @@ export default function DadpCommand() {
           </div>
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <span className="w-1.5 h-8 bg-[#C5A64D] rounded-full inline-block"></span>
-            DADP Key Operational Staff
+            {command.staffIntro}
           </h3>
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
-            {[
-              { role: "Chief Logistics Officer", desc: "Oversees hardware procurement and lab integrity." },
-              { role: "Head of Curriculum", desc: "Ensures technical syllabus aligns with modern standards." },
-              { role: "Network Administrator Base", desc: "Maintains zero-latency environment for internal systems." },
-              { role: "Student Affairs Officer", desc: "Manages housing, welfare, and student operational readiness." },
-            ].map((staff, idx) => (
+            {command.staffRoles.map((staff, idx) => (
               <div key={idx} className="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all cursor-pointer">
                 <h4 className="font-bold text-[#C5A64D] mb-2">{staff.role}</h4>
                 <p className="text-sm text-gray-300">{staff.desc}</p>

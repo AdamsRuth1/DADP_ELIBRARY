@@ -5,7 +5,13 @@ const CEREMONY_1 = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1
 const CEREMONY_2 = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 const CEREMONY_3 = "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
-export default function DadpCeremonies() {
+export default function DadpCeremonies({ config }) {
+  const slides = config?.slides || [
+    { title: "Celebrating Excellence", subtitle: "Recognizing the dedication and mastery of our graduating professionals" },
+    { title: "Honoring Achievement", subtitle: "Ceremonies that reflect our commitment to elite training and service." },
+    { title: "Tradition and Duty", subtitle: "Moments that define the next generation of digital defenders." }
+  ];
+
   const [currentCeremony, setCurrentCeremony] = useState(0);
   const ceremonies = [Classroom2, CEREMONY_2, CEREMONY_3];
 
@@ -20,7 +26,7 @@ export default function DadpCeremonies() {
     <section className="py-20" id="ceremonies">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F3D2B] mb-4">Graduation & Ceremonies</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1F3D2B] mb-4">{config?.heading || "Graduation & Ceremonies"}</h2>
           <div className="w-24 h-1.5 bg-[#C5A64D] mx-auto rounded-full"></div>
         </div>
 
@@ -33,8 +39,8 @@ export default function DadpCeremonies() {
               <img src={imgSrc} alt={`Ceremony ${idx + 1}`} className="w-full h-full object-cover opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end">
                 <div className="p-4 md:p-12 w-full text-center">
-                  <h3 className="text-lg md:text-3xl font-bold text-white mb-1 md:mb-2">Celebrating Excellence</h3>
-                  <p className="text-gray-200 text-xs md:text-base">Recognizing the dedication and mastery of our graduating professionals</p>
+                  <h3 className="text-lg md:text-3xl font-bold text-white mb-1 md:mb-2">{slides[idx]?.title}</h3>
+                  <p className="text-gray-200 text-xs md:text-base">{slides[idx]?.subtitle}</p>
                 </div>
               </div>
             </div>
