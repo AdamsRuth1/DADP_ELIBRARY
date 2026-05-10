@@ -17,7 +17,7 @@ function parseJwt(token) {
 function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ serviceID: '', name: '', password: '', role: 'User' });
+  const [form, setForm] = useState({ serviceID: '', name: '', password: '', role: 'User', status: 'Active' });
   const token = localStorage.getItem('token');
   const jwt = token ? parseJwt(token) : null;
   const role = jwt ? jwt.role : null;
@@ -30,7 +30,7 @@ function UsersPage() {
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, status: '' });
 
   const [editingUserId, setEditingUserId] = useState(null);
-  const [editUserForm, setEditUserForm] = useState({ name: '', password: '', role: 'User' });
+  const [editUserForm, setEditUserForm] = useState({ name: '', password: '', role: 'User', status: 'Active' });
 
   const [editingBookId, setEditingBookId] = useState(null);
   const [editBookForm, setEditBookForm] = useState({ title: '', author: '', category_id: '', file: null, thumbnail: null });
@@ -58,7 +58,7 @@ function UsersPage() {
 
     const res = await fetch(`${API_BASE}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
     if (res.ok) {
-      setForm({ serviceID: '', name: '', password: '', role: 'User' });
+      setForm({ serviceID: '', name: '', password: '', role: 'User', status: 'Active' });
       setUserModal({ open: false, mode: 'add', user: null });
       fetchUsers();
     } else {
@@ -69,12 +69,12 @@ function UsersPage() {
 
   async function editUser(u) {
     setUserModal({ open: true, mode: 'edit', user: u });
-    setEditUserForm({ name: u.name || '', password: '', role: u.role || 'User' });
+    setEditUserForm({ name: u.name || '', password: '', role: u.role || 'User', status: u.status || 'Active' });
   }
 
   function openAddUserModal() {
     setUserModal({ open: true, mode: 'add', user: null });
-    setForm({ serviceID: '', name: '', password: '', role: 'User' });
+    setForm({ serviceID: '', name: '', password: '', role: 'User', status: 'Active' });
   }
 
   async function updateUser(id) {
@@ -82,10 +82,11 @@ function UsersPage() {
     if (editUserForm.name !== undefined) payload.name = editUserForm.name;
     if (editUserForm.password) payload.password = editUserForm.password;
     if (editUserForm.role && role === 'SuperAdmin') payload.role = editUserForm.role;
+    if (editUserForm.status !== undefined) payload.status = editUserForm.status;
 
     const res = await fetch(`${API_BASE}/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
     if (res.ok) {
-      setEditUserForm({ name: '', password: '', role: 'User' });
+      setEditUserForm({ name: '', password: '', role: 'User', status: 'Active' });
       setUserModal({ open: false, mode: 'add', user: null });
       fetchUsers();
     } else {
@@ -484,7 +485,7 @@ function UsersPage() {
       <div>
         {loading ? <p>Loading...</p> : (
           <table className="w-full text-left border-collapse">
-            <thead><tr className="border-b"><th>ID</th><th>ServiceID</th><th>Name</th><th>Role</th><th>Actions</th></tr></thead>
+            <thead><tr className="border-b"><th>ID</th><th>ServiceID</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {users.map(u=> (
                 <tr key={u.id} className="border-b">
@@ -492,6 +493,11 @@ function UsersPage() {
                   <td className="p-2">{u.serviceID}</td>
                   <td className="p-2">{u.name}</td>
                   <td className="p-2">{u.role}</td>
+                  <td className="p-2">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${u.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {u.status || 'Active'}
+                    </span>
+                  </td>
                   <td className="p-2 flex gap-2">
                     <button className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600" onClick={()=>editUser(u)}>Edit</button>
                     <button className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" onClick={()=>deleteUser(u.id)}>Delete</button>
@@ -641,6 +647,24 @@ function UsersPage() {
                     {userModal.mode === 'edit' && role !== 'SuperAdmin' && (
                       <p className="text-xs text-gray-500 mt-1">Only SuperAdmins can change roles</p>
                     )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Status</label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                      value={userModal.mode === 'add' ? form.status : editUserForm.status}
+                      onChange={(e) => {
+                        if (userModal.mode === 'add') {
+                          setForm({...form, status: e.target.value});
+                        } else {
+                          setEditUserForm({...editUserForm, status: e.target.value});
+                        }
+                      }}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
                   </div>
                 </div>
 

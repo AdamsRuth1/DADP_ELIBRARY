@@ -10,6 +10,11 @@ export const SidebarData = [
         link:  "/dashboard"
     },
     {
+        title: "Landing Editor",
+        icon: <MenuBookIcon />,
+        link: "/dashboard"
+    },
+    {
         title: "Library",
         icon: <MenuBookIcon />,
         link: "/library",
