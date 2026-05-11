@@ -5,8 +5,15 @@ import Image2 from "../assets/PHOTO-2026-04-28-13-12-19.jpg"
 import Image3 from "../assets/PHOTO-2026-04-28-13-12-54.jpg"
 import Image4 from "../assets/PHOTO-2026-04-28-13-12-55 - Copy.jpg"
 
+const imageMap = {
+  Cordinator,
+  Image1,
+  Image2,
+  Image3,
+  Image4,
+};
 
-const instructors = [
+const defaultInstructors = [
   { name: "WO S. ADEBOWALE", role: "CSE COORD", desc: "Ethical Hacking, digital forensic and Advance Excel", img: Cordinator },
   { name: "WO J. ABUE ", role: "", desc: "Dediated to forging the next generation of threat analysts.", img: Image1 },
   { name: "WO SO. DUROJAIYE", role: "CSM", desc: "AI.", img: Image4 },
@@ -19,7 +26,12 @@ const instructors = [
 
 ];
 
-export default function DadpInstructors() {
+export default function DadpInstructors({ config }) {
+  const instructors = (config?.team || defaultInstructors).map((inst) => ({
+    ...inst,
+    img: inst.imgKey ? imageMap[inst.imgKey] || Cordinator : inst.img || Cordinator
+  }));
+
   const [currentInstructor, setCurrentInstructor] = useState(0);
 
   useEffect(() => {
@@ -27,20 +39,27 @@ export default function DadpInstructors() {
       setCurrentInstructor((prev) => (prev + 1) % instructors.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, []);
+  }, [instructors.length]);
+
+  const instructorConfig = config || {
+    heading: "Elite Dedicated Instructors",
+    description: "Our faculty consists of battle-hardened cyber engineers and seasoned database administrators. Their dedication to teaching ensures that every student graduates with unshakeable competence.",
+    highlight: "We don't just teach theory. Our instructors physically walk students through grueling live network architectures, ensuring quality education and tactical intuition.",
+    team: defaultInstructors
+  };
 
   return (
     <section className="py-20 bg-emerald-950 text-white overflow-hidden relative">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-fixed opacity-10 mix-blend-overlay"></div>
       <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
         <div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Elite Dedicated Instructors</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">{instructorConfig.heading}</h2>
           <div className="w-24 h-1.5 bg-[#C5A64D] rounded-full mb-8"></div>
           <p className="text-lg text-emerald-100/80 leading-relaxed mb-6">
-            Our faculty consists of battle-hardened cyber engineers and seasoned database administrators. Their dedication to teaching ensures that every student graduates with unshakeable competence.
+            {instructorConfig.description}
           </p>
           <p className="text-lg text-emerald-100/80 leading-relaxed">
-            We don't just teach theory. Our instructors physically walk students through grueling live network architectures, ensuring quality education and tactical intuition.
+            {instructorConfig.highlight}
           </p>
         </div>
         <div className="relative h-[450px] w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-emerald-800/50">
