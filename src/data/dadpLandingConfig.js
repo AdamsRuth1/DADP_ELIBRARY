@@ -65,8 +65,11 @@ const defaultDadpLandingConfig = {
     heading: "Command & Leadership",
     description: "The strategic visionaries guiding the Directorate of Automated Data Processing towards cyber excellence.",
     cards: [
-      { title: "Brigadier General [Name Placeholder]", subtitle: "Commander, Cyber Warfare Command", quote: "Our mission is to establish an impenetrable digital frontier. We equip our forces with the supreme technological superiority required to predict, defend, and eliminate systemic threats across the African cyberspace." },
-      { title: "Colonel [Name Placeholder]", subtitle: "Director of DADP", quote: "My mission for DADP is the relentless pursuit of educational excellence. We are transforming standard clerks into elite system administrators capable of manipulating massive datasets on the modern battlefield." }
+      { title: "Maj General CU UNWUNLE DSS psc fdc cm FCM MSc MNIM", subtitle: "21 DEC 21 TO 31 JAN 22" },
+      { title: "BRIG GEN EO AGBEBAKU DSS FCM psc", subtitle: "31 JAN 22 TO 15 FEB 23" },
+      { title: "BRIG GEN AA NGURU mni psc FNARC DSS", subtitle: "15 JAN 23 TO 14 OCT 24" },
+      { title: "COL KJ NWACHYKWU MSS FCM psc fwc M TECH MSC MISN MCPH", subtitle: "14 OCT 24 TO 28 FEB 25" },
+      { title: "BRIG GEN VE CLETUS DSS FCM psc fdc MNIM MCPN mspsp MSC", subtitle: "28 FEB 25 — PRESENT" }
     ],
     staffIntro: "DADP Key Operational Staff",
     staffRoles: [

@@ -1,6 +1,7 @@
 import React from "react";
 import Comd2 from "../assets/PHOTO-2026-04-27-15-09-25.jpg"
 import Comd1 from "../assets/PHOTO-2026-04-27-15-09-21.jpg"
+import Comd3 from "../assets/PHOTO-2026-04-27-15-09-37.jpg"
 export default function DadpCommand({ config }) {
   const command = config || {
     heading: "Command & Leadership",
@@ -23,13 +24,19 @@ export default function DadpCommand({ config }) {
         <div className="grid md:grid-cols-2 gap-12 mb-16">
           {command.cards.map((card, idx) => (
             <div key={idx} className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
-              <img src={idx === 0 ? Comd1 : Comd2} alt={card.title} className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
+              <img 
+                src={idx === 0 ? Comd1 : idx === 1 ? Comd2 : Comd3} 
+                alt={card.title} 
+                className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" 
+              />
               <div>
                 <h3 className="text-2xl font-bold text-[#1F3D2B]">{card.title}</h3>
                 <p className="text-[#C5A64D] font-bold mb-4">{card.subtitle}</p>
-                <p className="text-gray-600 leading-relaxed italic border-l-4 border-[#C5A64D] pl-4">
-                  {card.quote}
-                </p>
+                {card.quote && (
+                  <p className="text-gray-600 leading-relaxed italic border-l-4 border-[#C5A64D] pl-4">
+                    {card.quote}
+                  </p>
+                )}
               </div>
             </div>
           ))}
