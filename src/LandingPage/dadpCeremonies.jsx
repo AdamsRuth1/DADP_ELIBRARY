@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import Classroom2 from "../assets/IMG-20260407-WA0086.jpg"
+import Classroom3 from "../assets/IMG-20260407-WA0116.jpg"
+import Classroom4 from "../assets/IMG-20260407-WA0115.jpg"
+import Classroom5 from "../assets/IMG-20260407-WA0066.jpg"
 
-const CEREMONY_1 = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-const CEREMONY_2 = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-const CEREMONY_3 = "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
 export default function DadpCeremonies({ config }) {
   const slides = config?.slides || [
     { title: "Celebrating Excellence", subtitle: "Recognizing the dedication and mastery of our graduating professionals" },
     { title: "Honoring Achievement", subtitle: "Ceremonies that reflect our commitment to elite training and service." },
-    { title: "Tradition and Duty", subtitle: "Moments that define the next generation of digital defenders." }
+    { title: "Celebrating Excellence", subtitle: "Moments that define the next generation of digital defenders." }
   ];
 
   const [currentCeremony, setCurrentCeremony] = useState(0);
-  const ceremonies = [Classroom2, CEREMONY_2, CEREMONY_3];
+  const ceremonies = [Classroom2, Classroom3, Classroom4];
 
   useEffect(() => {
     const timer = setInterval(() => {

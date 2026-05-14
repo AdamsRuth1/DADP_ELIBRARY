@@ -34,7 +34,7 @@ const defaultDadpLandingConfig = {
     },
     director: {
       name: "BRIG GEN VE CLETUS",
-      rank: "DSS FCM psc fdc MNIM MSC",
+      rank: "DSS FCM psc fdc MNIM MSPSP MSC",
       role: "Director, Directorate Of Automated Data Processing (DADP)",
       overview: "Established in 1983, the Directorate of Automated Data Processing (DADP) was forged to primarily advise the Chief of Army Staff (COAS) on all critical matters concerning ICT, data automation, and Management Information Systems within the Nigerian Army."
     }
@@ -169,7 +169,7 @@ const defaultDadpLandingConfig = {
     slides: [
       { title: "Celebrating Excellence", subtitle: "Recognizing the dedication and mastery of our graduating professionals" },
       { title: "Honoring Achievement", subtitle: "Ceremonies that reflect our commitment to elite training and service." },
-      { title: "Tradition and Duty", subtitle: "Moments that define the next generation of digital defenders." }
+      { title: "Celebrating Excellence", subtitle: "Moments that define the next generation of digital defenders." }
     ]
   }
 };
