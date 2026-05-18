@@ -37,14 +37,11 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
       />
 
       <aside
-        className={[
-          "fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg overflow-y-auto",
-          "transform transition-transform duration-200",
-          // Desktop: always visible
-          "md:translate-x-0",
-          // Mobile: slide in/out
+        className={`fixed top-0 left-0 z-50 h-screen w-64 bg-[#1F3D2B] text-white flex flex-col border-r border-[#2c4d39] shadow-lg overflow-y-auto transition-transform duration-200 ${
+          // Mobile: -translate-x-full when closed, translate-x-0 when open
+          // Desktop (md+): always translate-x-0
           isOpen ? "translate-x-0" : "-translate-x-full"
-        ].join(" ")}
+        } md:translate-x-0`}
         aria-label="Main sidebar navigation"
       >
       {/* Header */}
