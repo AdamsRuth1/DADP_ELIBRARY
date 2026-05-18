@@ -9,6 +9,7 @@ import DadpInstructors from "./dadpInstructors";
 import DadpEvents from "./dadpEvents";
 import DadpPartnerships from "./dadpPartnerships";
 import DadpActivities from "./dadpActivities";
+import DadpCampusLife from "./dadpCampusLife";
 import DadpCeremonies from "./dadpCeremonies";
 import { useScrollAnimations } from "../hooks/useScrollAnimations";
 import { useLandingConfig } from "../hooks/useLandingConfig";
@@ -35,6 +36,7 @@ export default function DadpWebsite() {
           <DadpEvents config={config.events} />
           <DadpPartnerships config={config.partnerships} />
           <DadpActivities config={config.activities} />
+          <DadpCampusLife config={config.campusLife} />
           <DadpCeremonies config={config.ceremonies} />
         </div>
 

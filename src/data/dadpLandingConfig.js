@@ -166,6 +166,28 @@ const defaultDadpLandingConfig = {
     list: ["Intense Hands-On Practical Activities", "Real-time Threat Simulation Scenarios", "Collaborative Operations Tactics", "Hardware Assembly & Server Racking"]
   },
 
+  campusLife: {
+    heading: "Student Welfare & Premium Infrastructure",
+    subheading: "Creating a healthy, high-performance ecosystem for our student defenders with top-tier utilities and healthy recreation.",
+    facilities: [
+      {
+        title: "Evening Games & Sports Recreation",
+        description: "Fostering team cohesion, physical stamina, and mental wellness. DADP provides premium sporting facilities and diverse outdoor/indoor recreational games for students to unwind after intensive cyber operations training.",
+        tag: "Recreation & Wellness"
+      },
+      {
+        title: "24/7 Uninterrupted Hybrid Power Supply",
+        description: "Zero latency, zero downtime. Powered by clean hybrid solar installations and high-capacity silent standby generators, DADP ensures round-the-clock electric power supply to all laboratories, lecture theatres, and student hostels.",
+        tag: "Operational Infrastructure"
+      },
+      {
+        title: "Advanced Water Purification Systems",
+        description: "Promoting student health and safety. Equipped with professional multi-stage water filtration and industrial purification machines, guaranteeing clean, safe, and healthy drinking and cooking water daily.",
+        tag: "Health & Hygiene"
+      }
+    ]
+  },
+
   ceremonies: {
     heading: "Graduation & Ceremonies",
     description: "Recognizing the dedication and mastery of our graduating professionals.",

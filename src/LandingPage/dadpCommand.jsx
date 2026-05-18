@@ -25,7 +25,7 @@ export default function DadpCommand({ config }) {
           {command.cards.map((card, idx) => (
             <div key={idx} className="flex flex-col md:flex-row bg-slate-50 p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 items-center md:items-start gap-8">
               <img 
-                src={idx === 0 ? Comd1 : idx === 1 ? Comd2 : Comd3} 
+                src={[Comd1, Comd2, Comd3][idx % 3]} 
                 alt={card.title} 
                 className="w-40 h-40 object-cover rounded-2xl shadow-lg border-4 border-white" 
               />
