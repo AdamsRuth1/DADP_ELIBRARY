@@ -315,7 +315,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:p-6 md:pt-6 pb-24 md:pb-6">
+      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:ml-64 md:p-6 md:pt-6 pb-24 md:pb-6">
         {activeItem === "Library" && (
           <Library onOpenBook={setSelectedBook} />
         )}
@@ -341,7 +341,7 @@ function Dashboard() {
         )}
 
         {activeItem === "Dashboard" && (
-          <div className="min-h-screen md:ml-64">
+          <div className="min-h-screen">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold">Dashboard</h1>
             </div>

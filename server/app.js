@@ -689,19 +689,129 @@ app.get('/api/books/:id/views', maybeAuthenticate, maybeRequireRole('SuperAdmin'
 
 // --- Instructor Materials API ---
 app.get('/api/instructor/materials', authenticateJWT, async (req, res) => {
-  res.json([]);
+  const authorId = req.user.sub;
+  const role = req.user.role;
+
+  try {
+    // Determine if we should filter by author (Instructors only see their own, SuperAdmin sees all)
+    let sQuery = supabase.from('syllabuses').select('*');
+    let tQuery = supabase.from('topics').select('*');
+    let bQuery = supabase.from('books').select('*').not('topic_id', 'is', null);
+
+    if (role !== 'SuperAdmin' && role !== 'Admin') {
+      sQuery = sQuery.eq('author_id', authorId);
+      tQuery = tQuery.eq('author_id', authorId);
+      bQuery = bQuery.eq('author_id', authorId);
+    }
+
+    // 1. Fetch Syllabuses
+    const { data: syllabuses, error: sErr } = await sQuery.order('created_at', { ascending: false });
+    if (sErr) throw sErr;
+
+    // 2. Fetch Topics
+    const { data: topics, error: tErr } = await tQuery.order('created_at', { ascending: false });
+    if (tErr) throw tErr;
+
+    // 3. Fetch Materials (from books where topic_id is set)
+    const { data: books, error: bErr } = await bQuery.order('created_at', { ascending: false });
+    
+    // Combine and map
+    const combined = [
+      ...(syllabuses || []).map(s => ({ ...s, type: 'Syllabus', content: s.description, createdAt: s.created_at })),
+      ...(topics || []).map(t => ({ ...t, type: 'Topic', content: t.description, parentId: t.syllabus_id, createdAt: t.created_at })),
+      ...(books || []).map(b => ({ 
+        id: b.id, 
+        title: b.title, 
+        type: 'Material', 
+        content: b.author, 
+        fileUrl: b.file, 
+        thumbnail: b.thumbnail,
+        parentId: b.topic_id, 
+        authorId: b.author_id,
+        createdAt: b.created_at 
+      }))
+    ];
+
+    res.json(combined);
+  } catch (err) {
+    console.error('Fetch instructor materials error:', err);
+    res.status(500).json({ error: 'Failed to fetch materials', details: err.message });
+  }
 });
 
-app.post('/api/instructor/materials', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
-  res.status(501).json({ error: 'Instructor materials not yet migrated to Supabase' });
+app.post('/api/instructor/materials', maybeAuthenticate, maybeRequireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
+  const { title, type, content, fileUrl, parentId } = req.body;
+  const author_id = req.user.sub;
+
+  try {
+    let result;
+    if (type === 'Syllabus') {
+      result = await supabase.from('syllabuses').insert([{ title, description: content, author_id }]).select();
+    } else if (type === 'Topic') {
+      result = await supabase.from('topics').insert([{ title, description: content, syllabus_id: parentId, author_id }]).select();
+    } else if (type === 'Material') {
+      const bookData = {
+        title,
+        author: content || 'Instructor Material',
+        file: fileUrl,
+        topic_id: parentId,
+        author_id,
+        category: 'Instructor Material'
+      };
+      result = await supabase.from('books').insert([bookData]).select();
+    } else {
+      return res.status(400).json({ error: 'Invalid type' });
+    }
+
+    if (result.error) throw result.error;
+    const newItem = { ...result.data[0], type, createdAt: result.data[0].created_at };
+    await logActivity(author_id, `create_${type.toLowerCase()}`, type.toLowerCase(), newItem.id, JSON.stringify({ title }));
+    res.status(201).json(newItem);
+  } catch (err) {
+    console.error('Create material error:', err);
+    res.status(500).json({ error: 'Failed to save material', details: err.message });
+  }
 });
 
-app.put('/api/instructor/materials/:id', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
-  res.status(501).json({ error: 'Instructor materials not yet migrated to Supabase' });
+app.put('/api/instructor/materials/:id', maybeAuthenticate, maybeRequireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
+  const id = Number(req.params.id);
+  const { title, type, content, fileUrl, parentId } = req.body;
+
+  try {
+    let result;
+    if (type === 'Syllabus') {
+      result = await supabase.from('syllabuses').update({ title, description: content }).eq('id', id).select();
+    } else if (type === 'Topic') {
+      result = await supabase.from('topics').update({ title, description: content, syllabus_id: parentId }).eq('id', id).select();
+    } else if (type === 'Material') {
+      result = await supabase.from('books').update({ title, author: content, file: fileUrl, topic_id: parentId }).eq('id', id).select();
+    }
+
+    if (result.error) throw result.error;
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Update material error:', err);
+    res.status(500).json({ error: 'Failed to update' });
+  }
 });
 
-app.delete('/api/instructor/materials/:id', authenticateJWT, requireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
-  res.status(501).json({ error: 'Instructor materials not yet migrated to Supabase' });
+app.delete('/api/instructor/materials/:id', maybeAuthenticate, maybeRequireRole('Instructor', 'Admin', 'SuperAdmin'), async (req, res) => {
+  const id = Number(req.params.id);
+  const { type } = req.query;
+
+  try {
+    let table = 'instructor_materials';
+    if (type === 'Syllabus') table = 'syllabuses';
+    else if (type === 'Topic') table = 'topics';
+    else if (type === 'Material') table = 'books';
+
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Delete material error:', err);
+    res.status(500).json({ error: 'Failed to delete' });
+  }
 });
 
 // --- Google Books proxy to avoid rate limiting ---

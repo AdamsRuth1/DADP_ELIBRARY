@@ -8,7 +8,7 @@ function InstructorMaterials() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Material'); // 'Material', 'Syllabus', 'Topic'
   const [modal, setModal] = useState({ open: false, mode: 'add', item: null });
-  const [form, setForm] = useState({ title: '', type: 'Material', content: '', file: null, fileUrl: '' });
+  const [form, setForm] = useState({ title: '', type: 'Material', content: '', file: null, fileUrl: '', parentId: '' });
   const [isUploading, setIsUploading] = useState(false);
 
   const token = localStorage.getItem('token');
@@ -57,7 +57,8 @@ function InstructorMaterials() {
         title: form.title,
         type: form.type,
         content: form.content,
-        fileUrl: currentFileUrl
+        fileUrl: currentFileUrl,
+        parentId: form.parentId || null
       };
 
       const url = modal.mode === 'add' 
@@ -77,7 +78,7 @@ function InstructorMaterials() {
 
       if (res.ok) {
         setModal({ open: false, mode: 'add', item: null });
-        setForm({ title: '', type: 'Material', content: '', file: null, fileUrl: '' });
+        setForm({ title: '', type: activeTab, content: '', file: null, fileUrl: '', parentId: '' });
         fetchMaterials();
         alert(`Successfully ${modal.mode === 'add' ? 'added' : 'updated'} ${form.type.toLowerCase()}!`);
       } else {
@@ -91,10 +92,10 @@ function InstructorMaterials() {
     }
   }
 
-  async function deleteItem(id) {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+  async function deleteItem(item) {
+    if (!confirm(`Are you sure you want to delete this ${item.type.toLowerCase()}?`)) return;
     try {
-      const res = await fetch(`${API_BASE}/api/instructor/materials/${id}`, {
+      const res = await fetch(`${API_BASE}/api/instructor/materials/${item.id}?type=${item.type}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -113,10 +114,11 @@ function InstructorMaterials() {
         type: item.type,
         content: item.content || '',
         file: null,
-        fileUrl: item.fileUrl || ''
+        fileUrl: item.fileUrl || '',
+        parentId: item.parentId || ''
       });
     } else {
-      setForm({ title: '', type: activeTab, content: '', file: null, fileUrl: '' });
+      setForm({ title: '', type: activeTab, content: '', file: null, fileUrl: '', parentId: '' });
     }
   };
 
@@ -198,7 +200,7 @@ function InstructorMaterials() {
                     <button onClick={() => openModal('edit', item)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                       <Edit size={16} />
                     </button>
-                    <button onClick={() => deleteItem(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button onClick={() => deleteItem(item)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -208,6 +210,14 @@ function InstructorMaterials() {
               <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
                 {item.content || (item.fileUrl ? 'Document attached' : 'No description provided')}
               </p>
+              {item.parentId && (
+                <div className="mb-4 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase font-bold">Part of {item.type === 'Topic' ? 'Syllabus' : 'Topic'}</p>
+                  <p className="text-xs font-semibold text-[#1F3D2B] truncate">
+                    {materials.find(m => m.id === item.parentId)?.title || 'Unknown Parent'}
+                  </p>
+                </div>
+              )}
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
                 <span className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</span>
                 {item.fileUrl && (
@@ -267,6 +277,27 @@ function InstructorMaterials() {
                   ))}
                 </div>
               </div>
+
+              {(form.type === 'Topic' || form.type === 'Material') && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">
+                    Connect to {form.type === 'Topic' ? 'Syllabus' : 'Topic'} (Optional)
+                  </label>
+                  <select
+                    value={form.parentId}
+                    onChange={(e) => setForm({ ...form, parentId: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C5A64D] transition-all"
+                  >
+                    <option value="">-- No Connection --</option>
+                    {materials
+                      .filter(m => m.type === (form.type === 'Topic' ? 'Syllabus' : 'Topic'))
+                      .map(parent => (
+                        <option key={parent.id} value={parent.id}>{parent.title}</option>
+                      ))
+                    }
+                  </select>
+                </div>
+              )}
 
               {form.type === 'Material' ? (
                 <div>
