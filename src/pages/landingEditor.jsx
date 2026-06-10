@@ -66,7 +66,7 @@ export default function LandingEditor() {
   };
 
   return (
-    <div className="min-h-screen md:ml-64">
+    <div className="min-h-screen pl-[15px]">
       <div className="flex flex-col gap-4 mb-8">
         <h1 className="text-3xl font-bold">DADP Landing Page Editor</h1>
         <p className="text-gray-600 max-w-3xl">

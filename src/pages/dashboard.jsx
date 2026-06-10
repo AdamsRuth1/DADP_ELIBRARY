@@ -9,6 +9,7 @@ import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 import InstructorMaterials from "./instructorMaterials";
 import LandingEditor from "./landingEditor";
 import { API_BASE } from "../config/apiBase";
+import useAuth from '../hooks/useAuth';
 
 function parseJwt(token) {
   try {
@@ -36,8 +37,9 @@ function Dashboard() {
   });
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const jwt = token ? parseJwt(token) : null;
+  const auth = useAuth();
+  const token = auth?.token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+  const jwt = auth?.user || (token ? parseJwt(token) : null);
   const role = jwt ? jwt.role : null;
 
   // Refs for auto-scrolling
@@ -69,7 +71,7 @@ function Dashboard() {
         }));
 
         // Only populate Recently Added for Admin / SuperAdmin
-        const currentToken = localStorage.getItem('token');
+        const currentToken = auth?.token || localStorage.getItem('token');
         const currentJwt = currentToken ? parseJwt(currentToken) : null;
         const currentRole = currentJwt ? currentJwt.role : null;
         if (currentRole === 'Admin' || currentRole === 'SuperAdmin') {
@@ -203,7 +205,7 @@ function Dashboard() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = auth?.token || localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/analytics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -315,7 +317,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:ml-64 md:p-6 md:pt-6 pb-24 md:pb-6">
+      <main className="flex-1 overflow-x-auto px-4 py-4 pt-16 md:ml-64 md:px-6 md:pl-[15px] md:pt-6 pb-24 md:pb-6">
         {activeItem === "Library" && (
           <Library onOpenBook={setSelectedBook} />
         )}

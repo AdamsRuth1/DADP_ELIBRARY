@@ -342,6 +342,20 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Verify token and return user info
+app.get('/api/me', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const match = auth.match(/^Bearer (.+)$/);
+  if (!match) return res.status(401).json({ ok: false, error: 'Missing token' });
+  const token = match[1];
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    return res.json({ ok: true, user: payload });
+  } catch (err) {
+    return res.status(401).json({ ok: false, error: 'Invalid token' });
+  }
+});
+
 // --- AI Librarian (backend route for local dev / Render) ---
 function normalizeAi(s) {
   return String(s || "")

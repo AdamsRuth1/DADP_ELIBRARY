@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from '../assets/cyberwarfareLogo.png';
 import { SidebarData } from "./sidebarData";
+import useAuth from '../hooks/useAuth';
 
 function parseJwt(token) {
   try {
@@ -17,13 +18,16 @@ function parseJwt(token) {
 
 function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, onClose }) {
   const navigate = useNavigate();
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const user = token ? parseJwt(token) : null;
-  const displayName = user?.name || user?.serviceID || 'User';
+  const auth = useAuth();
+  const token = auth?.token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+  const parsedUser = auth?.user || (token ? parseJwt(token) : null);
+  const displayName = parsedUser?.name || parsedUser?.serviceID || 'User';
+  const effectiveRole = role || parsedUser?.role;
 
   const handleLogout = () => {
-    localStorage.clear(); // Clear all data (token, recent views, etc.)
-    window.location.href = '/'; // Hard redirect to landing page
+    if (auth && typeof auth.logout === 'function') auth.logout();
+    else localStorage.clear();
+    window.location.href = '/';
   };
 
   return (
@@ -64,9 +68,9 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2" aria-label="Sidebar menu">
-        {SidebarData.map((item, index) => {
+          {SidebarData.map((item, index) => {
           // hide Management item unless Admin or SuperAdmin
-          if (item.title === 'Users' && !(role === 'Admin' || role === 'SuperAdmin')) return null;
+          if (item.title === 'Users' && !(effectiveRole === 'Admin' || effectiveRole === 'SuperAdmin')) return null;
           const isActive = activeItem === item.title;
 
           return (
@@ -93,7 +97,7 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
                 {item.icon}
               </span>
 
-            <span className="text-sm">{item.title === 'Users' && role === 'SuperAdmin' ? 'Users' : item.title}</span>
+            <span className="text-sm">{item.title === 'Users' && effectiveRole === 'SuperAdmin' ? 'Users' : item.title}</span>
             </button>
           );
         })}

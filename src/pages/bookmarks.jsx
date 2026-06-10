@@ -54,7 +54,7 @@ function Bookmarks({ onOpenBook }) {
   };
 
   return (
-    <section className="min-h-screen md:ml-64" aria-label="Bookmarks">
+    <section className="min-h-screen pl-[15px]" aria-label="Bookmarks">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">Bookmarks</h1>
