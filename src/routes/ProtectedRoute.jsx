@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import Spinner from '../components/Spinner';
+import Spinner from '../Components/Spinner';
 
 export default function ProtectedRoute({ redirectTo = '/login' }) {
   const { user, loading } = useAuth();

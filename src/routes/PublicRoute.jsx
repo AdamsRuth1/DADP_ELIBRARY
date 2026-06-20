@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import Spinner from '../components/Spinner';
+import Spinner from '../Components/Spinner';
 
 export default function PublicRoute({ children, redirectTo = '/dashboard' }){
   const { user, loading } = useAuth();
