@@ -22,6 +22,7 @@ function addToRecentlyViewed(book) {
 }
 
 import { RatingSummary } from '../Components/Rating.jsx';
+import useAuth from '../hooks/useAuth';
 
 function Library({ onOpenBook }) {
   const [books, setBooks] = useState([]);
@@ -39,6 +40,7 @@ function Library({ onOpenBook }) {
   const [isSearchingGoogle, setIsSearchingGoogle] = useState(false);
   const [hasSearchedGoogle, setHasSearchedGoogle] = useState(false);
   const searchTimeoutRef = useRef(null);
+  const auth = useAuth();
 
   const searchGoogleBooks = () => {
     if (!searchTerm || isSearchingGoogle) return;
@@ -129,8 +131,8 @@ function Library({ onOpenBook }) {
     const savedFavorites = JSON.parse(localStorage.getItem('bookFavorites') || '[]');
     setFavorites(new Set(savedFavorites));
 
-    // Get user role
-    const token = localStorage.getItem('token');
+    // Get user role (prefer AuthContext)
+    const token = auth?.token || localStorage.getItem('token');
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -188,7 +190,7 @@ function Library({ onOpenBook }) {
   };
 
   const bulkFavorite = async (favorite) => {
-    const token = localStorage.getItem('token');
+    const token = auth?.token || localStorage.getItem('token');
     if (!token) return;
 
     try {
@@ -229,7 +231,7 @@ function Library({ onOpenBook }) {
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = auth?.token || localStorage.getItem('token');
     if (!token) return;
 
     try {
@@ -286,7 +288,7 @@ function Library({ onOpenBook }) {
   if (loading) return <p>Loading books…</p>;
 
   return (
-    <section className="min-h-screen md:ml-64 pb-24 md:pb-6" aria-label="Library books">
+    <section className="min-h-screen pb-24 md:pb-6 pl-[15px]" aria-label="Library books">
       <h1 className="text-2xl font-bold mb-6">Library</h1>
 
       {/* Filters */}
@@ -486,7 +488,7 @@ function Library({ onOpenBook }) {
                   <button
                     onClick={async () => {
                       try {
-                        const token = localStorage.getItem('token');
+                        const token = auth?.token || localStorage.getItem('token');
                         await fetch(`${API_BASE}/api/books/${book.id}/view`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {} });
                       } catch (e) { /* ignore */ }
                       addToRecentlyViewed(book);

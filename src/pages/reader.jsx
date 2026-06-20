@@ -3,6 +3,7 @@ import { RatingForm, ReviewList } from '../Components/Rating.jsx';
 import AiLibrarianWidget from "../Components/AiLibrarianWidget";
 
 import { API_BASE } from "../config/apiBase";
+import useAuth from '../hooks/useAuth';
 
 function Reader({ selectedBook, onBack }) {
   const [readingProgress, setReadingProgress] = useState(0);
@@ -17,6 +18,7 @@ function Reader({ selectedBook, onBack }) {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState("");
+  const auth = useAuth();
 
   const addBookmark = () => {
     try {
@@ -86,7 +88,7 @@ function Reader({ selectedBook, onBack }) {
     const loadUserRating = async () => {
       if (!selectedBook) return;
 
-      const token = localStorage.getItem('token');
+      const token = auth?.token || localStorage.getItem('token');
       if (!token) return;
 
       try {
@@ -136,7 +138,7 @@ function Reader({ selectedBook, onBack }) {
 
   // Handle rating submission
   const handleRatingSubmit = async (ratingData) => {
-    const token = localStorage.getItem('token');
+    const token = auth?.token || localStorage.getItem('token');
     if (!token) return false;
 
     try {

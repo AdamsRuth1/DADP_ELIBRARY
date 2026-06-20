@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE } from '../config/apiBase';
+import useAuth from '../hooks/useAuth';
 
 export default function CategoryDropdown({ value, onChange, required = false }) {
   const [categories, setCategories] = useState([]);
@@ -41,7 +42,8 @@ export default function CategoryDropdown({ value, onChange, required = false }) 
     if (!newCategory.trim()) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const auth = useAuth();
+      const token = auth?.token || localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/book-categories`, {
         method: 'POST',
         headers: {

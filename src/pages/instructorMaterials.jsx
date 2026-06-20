@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, Plus, Edit, Trash2, FileText, BookOpen, Layers, Upload, Save, X } from 'lucide-react';
 import { supabase } from '../config/supabaseClient';
 import { API_BASE } from "../config/apiBase";
+import useAuth from '../hooks/useAuth';
 
 function InstructorMaterials() {
   const [materials, setMaterials] = useState([]);
@@ -11,8 +12,9 @@ function InstructorMaterials() {
   const [form, setForm] = useState({ title: '', type: 'Material', content: '', file: null, fileUrl: '', parentId: '' });
   const [isUploading, setIsUploading] = useState(false);
 
-  const token = localStorage.getItem('token');
-  const user = token ? JSON.parse(atob(token.split('.')[1])) : null;
+  const auth = useAuth();
+  const token = auth?.token || localStorage.getItem('token');
+  const user = auth?.user || (token ? JSON.parse(atob(token.split('.')[1])) : null);
   const role = user?.role;
   const isInstructor = role === 'Instructor' || role === 'Admin' || role === 'SuperAdmin';
 

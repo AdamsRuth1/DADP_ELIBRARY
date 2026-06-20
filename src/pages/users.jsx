@@ -3,6 +3,7 @@ import { Search, Plus, Edit, Trash2, ShieldAlert, BookOpen, AlertCircle, FileTex
 import { supabase } from '../config/supabaseClient';
 import { API_BASE } from "../config/apiBase";
 import CategoryDropdown from '../Components/CategoryDropdown';
+import useAuth from '../hooks/useAuth';
 
 function parseJwt(token) {
   try {
@@ -18,8 +19,9 @@ function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ serviceID: '', name: '', password: '', role: 'User', status: 'Active' });
-  const token = localStorage.getItem('token');
-  const jwt = token ? parseJwt(token) : null;
+  const auth = useAuth();
+  const token = auth?.token || localStorage.getItem('token');
+  const jwt = auth?.user || (token ? parseJwt(token) : null);
   const role = jwt ? jwt.role : null;
 
   const [books, setBooks] = useState([]);

@@ -2,22 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { StarRating } from '../Components/Rating.jsx';
 
 import { API_BASE } from "../config/apiBase";
+import useAuth from '../hooks/useAuth';
 
 function Profile({ user, onBack }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const auth = useAuth();
+
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const token = localStorage.getItem('token');
+        const token = auth?.token || localStorage.getItem('token');
         if (!token) {
           setError('Not authenticated');
           return;
         }
 
-        const userId = user?.id ?? user?.sub;
+        const userId = user?.id ?? user?.sub ?? auth?.user?.id ?? auth?.user?.sub;
         if (!userId) {
           setError('Missing user id (please log in again)');
           return;
@@ -56,11 +59,11 @@ function Profile({ user, onBack }) {
     }
 
     fetchProfile();
-  }, [user?.id, user?.sub]);
+  }, [user?.id, user?.sub, auth?.user?.id, auth?.user?.sub, auth?.token]);
 
   if (loading) {
     return (
-      <div className="md:ml-64 flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen pl-[15px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F3D2B] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading profile...</p>
@@ -71,7 +74,7 @@ function Profile({ user, onBack }) {
 
   if (error) {
     return (
-      <div className="md:ml-64 flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen pl-[15px]">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
           <button
@@ -88,7 +91,7 @@ function Profile({ user, onBack }) {
   if (!profile) {
     const fallbackName = user?.name || user?.serviceID || "Reader";
     return (
-      <div className="md:ml-64 min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pl-[15px]">
         <header className="bg-[#1F3D2B] text-white px-6 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -174,7 +177,7 @@ function Profile({ user, onBack }) {
   const dna = computeReadingDNA();
 
   return (
-    <div className="md:ml-64 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-[#1F3D2B] text-white px-6 py-4">
         <div className="flex items-center justify-between">
           <button
