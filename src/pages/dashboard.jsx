@@ -338,7 +338,7 @@ function Dashboard() {
           <InstructorMaterials />
         )}
 
-        {activeItem === "Landing Editor" && (
+        {activeItem === "Landing Editor" && (role === 'Admin' || role === 'SuperAdmin') && (
           <LandingEditor />
         )}
 
