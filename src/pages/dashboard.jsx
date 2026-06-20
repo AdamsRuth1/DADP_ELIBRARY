@@ -338,7 +338,7 @@ function Dashboard() {
           <InstructorMaterials />
         )}
 
-        {activeItem === "Landing Editor" && (role === 'Admin' || role === 'SuperAdmin') && (
+        {activeItem === "Landing Editor" && (role === 'Admin' || role === 'SuperAdmin') && jwt?.serviceID?.toLowerCase() !== 'demo' && (
           <LandingEditor />
         )}
 

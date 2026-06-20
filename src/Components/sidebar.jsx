@@ -70,7 +70,7 @@ function Sidebar({ activeItem = "Dashboard", onNavigate, role, isOpen = false, o
       <nav className="flex-1 px-4 py-6 space-y-2" aria-label="Sidebar menu">
           {SidebarData.map((item, index) => {
           // hide Management item unless Admin or SuperAdmin
-          if ((item.title === 'Users' || item.title === 'Landing Editor') && !(effectiveRole === 'Admin' || effectiveRole === 'SuperAdmin')) return null;
+          if ((item.title === 'Users' || item.title === 'Landing Editor') && (!(effectiveRole === 'Admin' || effectiveRole === 'SuperAdmin') || parsedUser?.serviceID?.toLowerCase() === 'demo')) return null;
           const isActive = activeItem === item.title;
 
           return (
